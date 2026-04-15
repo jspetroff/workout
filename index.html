@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Training</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0f1117; color: #e8edf5; font-family: Georgia, serif; max-width: 480px; margin: 0 auto; }
+input, select, textarea, button { font-family: Georgia, serif; }
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<!-- App renders immediately -->
+<div id="app"></div>
+
+<script>
+// ── Firebase config ───────────────────────────────────────────────────────────
+// Paste your Firebase config here after setup
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDAhu0JEG-gQiCVIHu2PrUMq9kG3LuLrhg",
+  authDomain: "jp-workout.firebaseapp.com",
+  projectId: "jp-workout",
+  storageBucket: "jp-workout.firebasestorage.app",
+  messagingSenderId: "998100432483",
+  appId: "1:998100432483:web:eac515f401a44a5154ea56"
+};
+// Example:
+// const FIREBASE_CONFIG = {
+//   apiKey: "...", authDomain: "...", projectId: "...",
+//   storageBucket: "...", messagingSenderId: "...", appId: "..."
+// };
+
+// ── Data ──────────────────────────────────────────────────────────────────────
