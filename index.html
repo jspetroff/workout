@@ -6,7 +6,8 @@
 <title>Training</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: #0f1117; color: #e8edf5; font-family: Georgia, serif; max-width: 480px; margin: 0 auto; }
+html { background: #0f1117; }
+body { background: #0f1117; color: #e8edf5; font-family: Georgia, serif; max-width: 480px; margin: 0 auto; min-height: 100vh; }
 input, select, textarea, button { font-family: Georgia, serif; }
 @keyframes spin { to { transform: rotate(360deg); } }
 </style>
@@ -27,10 +28,504 @@ const FIREBASE_CONFIG = {
   messagingSenderId: "998100432483",
   appId: "1:998100432483:web:eac515f401a44a5154ea56"
 };
-// Example:
-// const FIREBASE_CONFIG = {
-//   apiKey: "...", authDomain: "...", projectId: "...",
-//   storageBucket: "...", messagingSenderId: "...", appId: "..."
-// };
 
 // ── Data ──────────────────────────────────────────────────────────────────────
+
+const MONDAY = [
+  { id:"mon-a", label:"A", theme:"Squat + Vertical Pull + Ankle Rebuild", blocks:[
+    {name:"Warmup",sets:null,notes:"Sun salutations / ankle CARs / glute activation"},
+    {name:"Goblet Squat (tempo 3-1-1)",sets:"3x8",notes:"Slow eccentric. Full depth as ankle allows."},
+    {name:"Pull-Up or Lat Pulldown",sets:"4x6-8",notes:"Dead hang. Scapular control."},
+    {name:"Single-Leg RDL (light)",sets:"3x8 each",notes:"Use ankle as guide. Glute squeeze at top."},
+    {name:"Half-Kneeling Pallof Press",sets:"3x10 each",notes:"Proprioception + anti-rotation. Switch lead leg."},
+    {name:"Ankle Alphabet / Balance Work",sets:"2x60s each",notes:"Single-leg stance on foam pad."},
+  ]},
+  { id:"mon-b", label:"B", theme:"Bulgarian Split Squat + Row + Balance", blocks:[
+    {name:"Warmup",sets:null,notes:"Sun salutations / hip 90-90 / ankle mobility"},
+    {name:"Bulgarian Split Squat",sets:"4x6 each",notes:"Rear foot elevated. Glute squeeze at top."},
+    {name:"Chest-Supported DB Row",sets:"4x10",notes:"Elbows back, squeeze at top. No momentum."},
+    {name:"Hip Thrust",sets:"3x12",notes:"Barbell or band. Primary glute driver."},
+    {name:"Single-Leg Balance to Reach",sets:"3x8 each direction",notes:"Star excursion. Ankle rehab + proprioception."},
+    {name:"Farmer Carry",sets:"3x40 yds",notes:"Heavy. Core stiffness, posture."},
+  ]},
+  { id:"mon-c", label:"C", theme:"Squat Variation + Horizontal Pull + Glute Accessory", blocks:[
+    {name:"Warmup",sets:null,notes:"Sun salutations / ankle CARs / lateral band walks"},
+    {name:"Front Squat or Safety Bar Squat",sets:"4x5",notes:"Upright torso. Go as deep as comfortable."},
+    {name:"Inverted Row or Cable Row",sets:"4x10",notes:"Full protraction to retraction. Keep hips stiff."},
+    {name:"Sumo RDL",sets:"3x10",notes:"Wide stance. Control the eccentric."},
+    {name:"Side-Lying Hip Abduction + Clamshell",sets:"2x15 each",notes:"Banded. Glute med upstream of ankle."},
+    {name:"Single-Leg Calf Raise",sets:"3x15 each",notes:"Slow. Ankle strengthening."},
+  ]},
+];
+
+const THURSDAY = [
+  { id:"thu-a", label:"A", theme:"Hinge Heavy + Explosive Finish", blocks:[
+    {name:"Warmup",sets:null,notes:"Hip 90-90 / cat-cow / glute activation / ankle prep"},
+    {name:"Trap Bar Deadlift",sets:"4x5",notes:"Go heavy. Neutral spine, push the floor away."},
+    {name:"Box Jump (bilateral)",sets:"4x4",notes:"Step down, don't jump down. Pain as guide on landing."},
+    {name:"Kettlebell Swing",sets:"3x15",notes:"Hinge, not squat. Explosive hip snap."},
+    {name:"Copenhagen Plank",sets:"3x20s each",notes:"Adductor + hip stability. Ankle stays neutral."},
+    {name:"Recovery: 10 min easy walk or bike",sets:null,notes:"Flush legs before cold plunge if doing today."},
+  ]},
+  { id:"thu-b", label:"B", theme:"Power Day: Jumps + RDL", blocks:[
+    {name:"Warmup",sets:null,notes:"Dynamic hip openers / jump rope easy 3 min / ankle prep"},
+    {name:"Broad Jump",sets:"5x3",notes:"Max intent. Bilateral. Absorb through hips."},
+    {name:"Romanian Deadlift",sets:"4x8",notes:"Full hamstring stretch. Slow eccentric (3 sec down)."},
+    {name:"Lateral Bound + Stick (bilateral)",sets:"3x5 each",notes:"Lateral explosive. Land both feet."},
+    {name:"Suitcase Carry",sets:"3x30 yds each",notes:"Offset load. Anti-lateral flexion."},
+    {name:"Dead Bug",sets:"3x8 each",notes:"Core control. Slow and deliberate."},
+  ]},
+  { id:"thu-c", label:"C", theme:"Explosive + Posterior Chain + Active Recovery", blocks:[
+    {name:"Warmup",sets:null,notes:"Sun salutations / hip flexor stretch / calf/ankle mobility"},
+    {name:"Hang Power Clean or DB Jump Squat",sets:"4x4",notes:"Clean mechanics first. Otherwise DB jump squat."},
+    {name:"Single-Leg RDL (loaded)",sets:"3x8 each",notes:"Building on Monday. Go heavier if ankle allows."},
+    {name:"Step-Up + Drive Knee",sets:"3x8 each",notes:"Box at knee height. Glute loading. Ankle rehab."},
+    {name:"Plank Variations",sets:"3x30s",notes:"Rotate: standard / RKC / side / reach-through. Pick 2."},
+    {name:"10-15 min easy yoga or stretch",sets:null,notes:"Active recovery to close. Don't skip this."},
+  ]},
+];
+
+const FRI_OPTIONS = [
+  {id:"fri-yoga",   label:"Yoga (Studio)",emoji:"🧘",note:"Count toward weekly quota. Avoid if did hot yoga Thu."},
+  {id:"fri-pilates",label:"Pilates",      emoji:"⭕",note:"Core, stability, ankle-friendly. Great after a heavy Thu."},
+  {id:"fri-run-z2", label:"Easy Run (Z2)",emoji:"🏃",note:"130-152 bpm. Conversational. 30-45 min."},
+  {id:"fri-swim",   label:"Pool Swim",    emoji:"🏊",note:"Easy aerobic or intervals with Kevin. Ankle loves it."},
+  {id:"fri-kb",     label:"Kettlebells",  emoji:"🔔",note:"Swings, TGUs, carries. Keep it moving, not grinding."},
+  {id:"fri-n4x4",  label:"N4x4 Run",     emoji:"⚡",note:"170-177 bpm work intervals. Only if Thu was lower intensity."},
+  {id:"fri-rest",   label:"Rest",         emoji:"🛋",note:"Good call. The week counts without Friday."},
+];
+
+const DAYS = ["Mon","Tue","Wed","Thu","Fri"];
+const DAY_LABELS = {Mon:"Strength",Tue:"Yoga + Cold",Wed:"N4x4 or Swim",Thu:"Strength + Explosive",Fri:"Variable"};
+
+// ── State ─────────────────────────────────────────────────────────────────────
+
+const S = {
+  sessions: {}, recovery: {},
+  view: "today", weekOffset: 0,
+  selectedDay: ({1:"Mon",2:"Tue",3:"Wed",4:"Thu",5:"Fri"})[new Date().getDay()] || "Mon",
+  monPlan: 0, thuPlan: 0,
+  saveStatus: "idle",
+  recoveryActiveKey: new Date().toISOString().slice(0,10),
+};
+
+let saveTimer = null;
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function getWeekKey(off) {
+  const d = new Date();
+  d.setDate(d.getDate() - d.getDay() + 1 + (off||0)*7);
+  return d.toISOString().slice(0,10);
+}
+function fmtDate(iso) { return new Date(iso+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric"}); }
+function todayKey() { return new Date().toISOString().slice(0,10); }
+function last7() {
+  return Array.from({length:7},(_,i)=>{ const d=new Date(); d.setDate(d.getDate()-(6-i)); return d.toISOString().slice(0,10); });
+}
+function lc(load) { return load==="normal"?"#4ade80":load==="heavy"?"#fbbf24":load==="a lot"?"#f87171":"#2a3545"; }
+function sKey(off,day) { return getWeekKey(off)+"_"+day; }
+function getSess(off,day) { return S.sessions[sKey(off,day)]||{}; }
+function esc(s) { return (s||"").replace(/"/g,"&quot;").replace(/</g,"&lt;"); }
+
+// ── Firebase (lazy) ───────────────────────────────────────────────────────────
+
+let db = null;
+let DOC_REF = null;
+
+async function initFirebase() {
+  if(!FIREBASE_CONFIG || db) return !!db;
+  try {
+    const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
+    const { getFirestore, doc, getDoc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    const fbApp = initializeApp(FIREBASE_CONFIG);
+    db = getFirestore(fbApp);
+    DOC_REF = doc(db, "users", "jp");
+    window._fbGetDoc = getDoc;
+    window._fbSetDoc = setDoc;
+    return true;
+  } catch(e) { console.error("Firebase init failed:", e); return false; }
+}
+
+async function loadFromFirebase() {
+  const ok = await initFirebase();
+  if(!ok) return;
+  try {
+    const snap = await window._fbGetDoc(DOC_REF);
+    if(snap.exists()) {
+      const data = snap.data();
+      S.sessions = data.sessions||{};
+      S.recovery = data.recovery||{};
+      renderAll();
+    }
+  } catch(e) { console.error("Load failed:", e); }
+}
+
+async function saveToFirebase() {
+  const ok = await initFirebase();
+  if(!ok) return;
+  try {
+    await window._fbSetDoc(DOC_REF, {sessions:S.sessions,recovery:S.recovery},{merge:true});
+    setSaveStatus("saved");
+    setTimeout(()=>setSaveStatus("idle"),2000);
+  } catch(e) {
+    console.error("Save failed:", e);
+    setSaveStatus("error");
+    setTimeout(()=>setSaveStatus("idle"),3000);
+  }
+}
+
+function scheduleSave() {
+  setSaveStatus("saving");
+  if(saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveToFirebase, 1000);
+}
+
+function setSaveStatus(s) {
+  S.saveStatus = s;
+  const el = document.getElementById("save-badge");
+  if(!el) return;
+  if(s==="idle") { el.style.display="none"; return; }
+  el.style.display = "block";
+  el.style.background = s==="saved"?"#1e3a2a":s==="error"?"#2d1515":"#1a2030";
+  el.style.borderColor = s==="saved"?"#4ade80":s==="error"?"#f87171":"#2a3545";
+  el.style.color = s==="saved"?"#4ade80":s==="error"?"#f87171":"#6b7a90";
+  el.textContent = s==="saving"?"Saving...":s==="saved"?"✓ Saved":"✗ Save failed — check Firebase config";
+}
+
+// ── Event handlers ────────────────────────────────────────────────────────────
+
+window.setView = v => { S.view=v; renderAll(); };
+window.selectDay = d => { S.selectedDay=d; renderAll(); };
+window.setMonPlan = i => { S.monPlan=parseInt(i); renderDay(); };
+window.setThuPlan = i => { S.thuPlan=parseInt(i); renderDay(); };
+window.weekBack = () => { S.weekOffset--; renderAll(); };
+window.weekFwd = () => { if(S.weekOffset<0){S.weekOffset++;renderAll();} };
+window.setRecoveryDay = k => { S.recoveryActiveKey=k; renderRecovery(); };
+
+window.setSessionField = (field,val) => {
+  const k=sKey(S.weekOffset,S.selectedDay);
+  S.sessions[k]={...(S.sessions[k]||{}),[field]:val};
+  scheduleSave(); renderDayTabs(); renderHeader();
+};
+window.toggleField = field => {
+  const k=sKey(S.weekOffset,S.selectedDay);
+  const cur=S.sessions[k]||{};
+  S.sessions[k]={...cur,[field]:!cur[field]};
+  scheduleSave(); renderDay(); renderHeader();
+};
+window.toggleRestDay = () => {
+  const k=sKey(S.weekOffset,S.selectedDay);
+  const cur=S.sessions[k]||{};
+  S.sessions[k]={...cur,restDay:!cur.restDay};
+  scheduleSave(); renderDay(); renderDayTabs();
+};
+window.toggleExercise = i => {
+  const k=sKey(S.weekOffset,S.selectedDay);
+  const cur=S.sessions[k]||{};
+  const checked={...(cur.checked||{}),[i]:!(cur.checked||{})[i]};
+  S.sessions[k]={...cur,checked};
+  scheduleSave(); renderDay();
+};
+window.setExerciseNote = (i,val) => {
+  const k=sKey(S.weekOffset,S.selectedDay);
+  const cur=S.sessions[k]||{};
+  S.sessions[k]={...cur,notes:{...(cur.notes||{}),[i]:val}};
+  scheduleSave();
+};
+window.setRecoveryHRV = val => {
+  const ak=S.recoveryActiveKey;
+  S.recovery[ak]={...(S.recovery[ak]||{}),hrv:val};
+  scheduleSave(); renderRecovery();
+};
+window.setRecoveryLoad = val => {
+  const ak=S.recoveryActiveKey;
+  S.recovery[ak]={...(S.recovery[ak]||{}),load:val};
+  scheduleSave(); renderRecovery();
+};
+
+// ── Render ────────────────────────────────────────────────────────────────────
+
+function workoutCardHTML(workout,sData) {
+  const checked=sData.checked||{}, notes=sData.notes||{};
+  const total=workout.blocks.filter(b=>b.sets).length;
+  const done=workout.blocks.filter((b,i)=>b.sets&&checked[i]).length;
+  const rows=workout.blocks.map((ex,i)=>{
+    const c=!!checked[i];
+    return `<div style="padding:12px 0;border-bottom:1px solid #1e2530;display:flex;gap:12px;align-items:flex-start;">
+      <button onclick="toggleExercise(${i})" style="margin-top:2px;width:22px;height:22px;border-radius:4px;border:${c?"none":"2px solid #3a4555"};background:${c?"#4ade80":"transparent"};cursor:pointer;flex-shrink:0;color:#0f1117;font-weight:900;font-size:13px;">${c?"✓":""}</button>
+      <div style="flex:1;">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;">
+          <span style="color:${c?"#6b7a90":"#e8edf5"};font-weight:600;font-size:15px;text-decoration:${c?"line-through":"none"};">${ex.name}</span>
+          ${ex.sets?`<span style="color:#4ade80;font-size:13px;font-family:monospace;margin-left:8px;">${ex.sets}</span>`:""}
+        </div>
+        <div style="color:#6b7a90;font-size:13px;margin-top:2px;">${ex.notes}</div>
+        <input type="text" value="${esc(notes[i])}" placeholder="Notes..." onchange="setExerciseNote(${i},this.value)"
+          style="margin-top:6px;width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#c8d4e8;font-size:13px;padding:5px 8px;box-sizing:border-box;outline:none;">
+      </div>
+    </div>`;
+  }).join("");
+  const feelOpts=["","💪 Strong","✅ Solid","😐 Meh","🪫 Low energy","🦵 Ankle flagging"].map(o=>`<option value="${o}"${sData.feel===o?" selected":""}>${o||"Select..."}</option>`).join("");
+  return `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+      <div style="color:#4ade80;font-size:13px;font-weight:700;letter-spacing:1px;">PLAN ${workout.label}</div>
+      <div style="color:#6b7a90;font-size:13px;">${done}/${total} done</div>
+    </div>
+    <div style="color:#c8d4e8;font-size:15px;font-weight:600;margin-bottom:14px;">${workout.theme}</div>
+    ${rows}
+    <div style="margin-top:16px;display:flex;gap:8px;">
+      <div style="flex:1;"><div style="color:#6b7a90;font-size:12px;margin-bottom:4px;">RPE (1-10)</div>
+        <input type="number" min="1" max="10" value="${esc(sData.rpe)}" onchange="setSessionField('rpe',this.value)"
+          style="width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#e8edf5;font-size:15px;padding:7px 10px;box-sizing:border-box;outline:none;"></div>
+      <div style="flex:2;"><div style="color:#6b7a90;font-size:12px;margin-bottom:4px;">Feel</div>
+        <select onchange="setSessionField('feel',this.value)"
+          style="width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:${sData.feel?"#e8edf5":"#6b7a90"};font-size:14px;padding:7px 10px;box-sizing:border-box;outline:none;">${feelOpts}</select></div>
+    </div>
+    <div style="margin-top:10px;"><div style="color:#6b7a90;font-size:12px;margin-bottom:4px;">Session note</div>
+      <textarea rows="2" placeholder="Anything to remember..." onchange="setSessionField('sessionNote',this.value)"
+        style="width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#c8d4e8;font-size:13px;padding:7px 10px;box-sizing:border-box;resize:none;outline:none;">${esc(sData.sessionNote)}</textarea></div>`;
+}
+
+function restHTML(sData) {
+  return `<div style="background:#141b26;border-radius:10px;padding:20px 16px;text-align:center;">
+    <div style="font-size:28px;margin-bottom:6px;">🛋</div>
+    <div style="color:#6b7a90;font-size:15px;margin-bottom:12px;">Rest day</div>
+    <textarea rows="2" placeholder="Optional note..." onchange="setSessionField('sessionNote',this.value)"
+      style="width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#c8d4e8;font-size:13px;padding:7px 10px;box-sizing:border-box;resize:none;outline:none;">${esc(sData.sessionNote)}</textarea>
+  </div>
+  <button onclick="toggleRestDay()" style="margin-top:12px;width:100%;padding:10px 0;border-radius:8px;border:1px solid #2a3545;background:transparent;color:#6b7a90;font-size:13px;cursor:pointer;">Back to workout</button>`;
+}
+
+function planBtnRow(plans,selected,setter) {
+  return `<div style="display:flex;gap:8px;margin-bottom:16px;">${plans.map((w,i)=>`<button onclick="${setter}(${i})" style="flex:1;padding:8px 0;border-radius:8px;border:${selected===i?"none":"1px solid #2a3545"};background:${selected===i?"#4ade80":"#1a2030"};color:${selected===i?"#0f1117":"#6b7a90"};font-weight:700;font-size:14px;cursor:pointer;">Plan ${w.label}</button>`).join("")}</div>`;
+}
+
+function restBtn() {
+  return `<button onclick="toggleRestDay()" style="margin-top:18px;width:100%;padding:10px 0;border-radius:8px;border:1px solid #2a3545;background:transparent;color:#6b7a90;font-size:13px;cursor:pointer;">Log as rest day</button>`;
+}
+
+function renderDay() {
+  const el=document.getElementById("day-content"); if(!el) return;
+  const d=S.selectedDay, sData=getSess(S.weekOffset,d);
+  if(sData.restDay) { el.innerHTML=restHTML(sData); return; }
+
+  if(d==="Mon") {
+    el.innerHTML = planBtnRow(MONDAY,S.monPlan,"setMonPlan") + workoutCardHTML(MONDAY[S.monPlan],sData) + restBtn();
+  } else if(d==="Tue") {
+    const y=sData.yogaDone,p=sData.plungeDone;
+    const feelOpts=["","💪 Strong flow","✅ Solid class","😐 Meh","🪫 Low energy"].map(o=>`<option value="${o}"${sData.feel===o?" selected":""}>${o||"Select..."}</option>`).join("");
+    el.innerHTML=`
+      <div style="color:#c8d4e8;font-weight:600;margin-bottom:4px;">Leigh's 9:30 heated vinyasa</div>
+      <div style="color:#6b7a90;font-size:13px;margin-bottom:16px;">Cold plunge after — 5 min. No strength conflict today.</div>
+      <div style="display:flex;gap:10px;margin-bottom:16px;">
+        <button onclick="toggleField('yogaDone')" style="flex:1;padding:12px 0;border-radius:10px;border:${y?"none":"1px solid #2a3545"};background:${y?"#4ade80":"#1a2030"};color:${y?"#0f1117":"#9bacc0"};font-weight:600;font-size:14px;cursor:pointer;">🧘 Yoga done</button>
+        <button onclick="toggleField('plungeDone')" style="flex:1;padding:12px 0;border-radius:10px;border:${p?"none":"1px solid #2a3545"};background:${p?"#4ade80":"#1a2030"};color:${p?"#0f1117":"#9bacc0"};font-weight:600;font-size:14px;cursor:pointer;">🧊 Cold plunge done</button>
+      </div>
+      <div style="color:#6b7a90;font-size:12px;margin-bottom:4px;">Feel</div>
+      <select onchange="setSessionField('feel',this.value)" style="width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:${sData.feel?"#e8edf5":"#6b7a90"};font-size:14px;padding:8px 10px;box-sizing:border-box;outline:none;margin-bottom:10px;">${feelOpts}</select>
+      <textarea rows="2" placeholder="Note..." onchange="setSessionField('sessionNote',this.value)" style="width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#c8d4e8;font-size:13px;padding:7px 10px;box-sizing:border-box;resize:none;outline:none;">${esc(sData.sessionNote)}</textarea>
+      ${restBtn()}`;
+  } else if(d==="Wed") {
+    const isR=sData.modality==="run",isS=sData.modality==="swim";
+    el.innerHTML=`
+      <div style="color:#c8d4e8;font-weight:600;margin-bottom:4px;">N4x4 or Pool with Kevin</div>
+      <div style="color:#6b7a90;font-size:13px;margin-bottom:14px;">Run: 4x4 min at 170-177 bpm, 3 min recovery below 130. Swim: 4x4 min hard, rest ~3 min.</div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;">
+        <button onclick="setSessionField('modality','run')" style="flex:1;padding:10px 0;border-radius:8px;border:${isR?"none":"1px solid #2a3545"};background:${isR?"#4ade80":"#1a2030"};color:${isR?"#0f1117":"#9bacc0"};font-weight:600;font-size:14px;cursor:pointer;">🏃 N4x4 Run</button>
+        <button onclick="setSessionField('modality','swim')" style="flex:1;padding:10px 0;border-radius:8px;border:${isS?"none":"1px solid #2a3545"};background:${isS?"#4ade80":"#1a2030"};color:${isS?"#0f1117":"#9bacc0"};font-weight:600;font-size:14px;cursor:pointer;">🏊 Pool w/ Kevin</button>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:10px;">
+        <div style="flex:1;"><div style="color:#6b7a90;font-size:12px;margin-bottom:4px;">Peak HR (bpm)</div><input type="number" value="${esc(sData.peakHR)}" onchange="setSessionField('peakHR',this.value)" style="width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#e8edf5;font-size:15px;padding:7px 10px;box-sizing:border-box;outline:none;"></div>
+        <div style="flex:1;"><div style="color:#6b7a90;font-size:12px;margin-bottom:4px;">RPE (1-10)</div><input type="number" min="1" max="10" value="${esc(sData.rpe)}" onchange="setSessionField('rpe',this.value)" style="width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#e8edf5;font-size:15px;padding:7px 10px;box-sizing:border-box;outline:none;"></div>
+      </div>
+      <textarea rows="2" placeholder="Intervals felt... ankle... Kevin's splits..." onchange="setSessionField('sessionNote',this.value)" style="width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#c8d4e8;font-size:13px;padding:7px 10px;box-sizing:border-box;resize:none;outline:none;">${esc(sData.sessionNote)}</textarea>
+      ${restBtn()}`;
+  } else if(d==="Thu") {
+    const pre=sData.plungePreLift,skip=sData.plungeSkipped;
+    el.innerHTML = planBtnRow(THURSDAY,S.thuPlan,"setThuPlan") + workoutCardHTML(THURSDAY[S.thuPlan],sData) + `
+      <div style="margin-top:14px;background:#0d1520;border-radius:8px;padding:10px 12px;border:1px solid #1e3a2a;">
+        <div style="color:#4ade80;font-size:12px;font-weight:700;margin-bottom:4px;">🧊 COLD PLUNGE</div>
+        <div style="color:#6b7a90;font-size:13px;">Before lifting, or 4-6 hrs after. Not immediately post-strength.</div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <button onclick="toggleField('plungePreLift')" style="flex:1;padding:10px 0;border-radius:8px;border:${pre?"none":"1px solid #2a3545"};background:${pre?"#4ade80":"#1a2030"};color:${pre?"#0f1117":"#9bacc0"};font-weight:600;font-size:13px;cursor:pointer;">🧊 Plunged pre-lift</button>
+        <button onclick="toggleField('plungeSkipped')" style="flex:1;padding:10px 0;border-radius:8px;border:${skip?"none":"1px solid #2a3545"};background:${skip?"#4ade80":"#1a2030"};color:${skip?"#0f1117":"#9bacc0"};font-weight:600;font-size:13px;cursor:pointer;">Skipped today</button>
+      </div>
+      ${restBtn()}`;
+  } else if(d==="Fri") {
+    const pick=sData.fridgePick;
+    const thu=getSess(S.weekOffset,"Thu"),tue=getSess(S.weekOffset,"Tue");
+    const thuRpe=parseInt(thu.rpe)||0;
+    let sugg=[];
+    if(tue.yogaDone){sugg.push({id:"fri-pilates",reason:"You did yoga Tue — Pilates without stacking hot flows."});sugg.push({id:"fri-swim",reason:"Pool is open. Low-impact, ankle-friendly."});}
+    else sugg.push({id:"fri-yoga",reason:"Haven't done yoga yet this week — hit the studio."});
+    if(thuRpe>=8) sugg.push({id:"fri-run-z2",reason:"Thu was heavy — Zone 2 is a flush, not a session."});
+    else if(thuRpe<=5&&thuRpe>0) sugg.push({id:"fri-n4x4",reason:"Thu was light — you've got legs for N4x4."});
+    sugg=sugg.slice(0,2);
+    const suggHTML=sugg.length?`<div style="background:#0d1520;border-radius:8px;padding:10px 12px;border:1px solid #1e3a2a;margin-bottom:14px;"><div style="color:#4ade80;font-size:12px;font-weight:700;margin-bottom:6px;">SUGGESTED</div>${sugg.map(s=>{const o=FRI_OPTIONS.find(f=>f.id===s.id);return o?`<div style="color:#9bacc0;font-size:13px;margin-bottom:4px;">${o.emoji} <strong style="color:#c8d4e8;">${o.label}</strong> — ${s.reason}</div>`:""}).join("")}</div>`:"";
+    const pickBtns=FRI_OPTIONS.map(o=>`<button onclick="setSessionField('fridgePick','${o.id}')" style="padding:8px 14px;border-radius:20px;border:${pick===o.id?"none":"1px solid #2a3545"};background:${pick===o.id?"#4ade80":"#1a2030"};color:${pick===o.id?"#0f1117":"#9bacc0"};font-weight:600;font-size:13px;cursor:pointer;">${o.emoji} ${o.label}</button>`).join("");
+    const pickedOpt=pick?FRI_OPTIONS.find(f=>f.id===pick):null;
+    const feelOpts=["","💪 Strong","✅ Solid","😐 Meh","🪫 Low energy"].map(o=>`<option value="${o}"${sData.feel===o?" selected":""}>${o||"Select..."}</option>`).join("");
+    el.innerHTML=`
+      <div style="color:#c8d4e8;font-weight:600;margin-bottom:4px;">Variable Day</div>
+      ${suggHTML}
+      <div style="color:#6b7a90;font-size:12px;margin-bottom:8px;">What did you do?</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;">${pickBtns}</div>
+      ${pickedOpt?`<div style="color:#6b7a90;font-size:13px;margin-bottom:10px;font-style:italic;">${pickedOpt.note}</div>`:""}
+      <div style="display:flex;gap:8px;margin-bottom:10px;">
+        <div style="flex:1;"><div style="color:#6b7a90;font-size:12px;margin-bottom:4px;">RPE</div><input type="number" min="1" max="10" value="${esc(sData.rpe)}" onchange="setSessionField('rpe',this.value)" style="width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#e8edf5;font-size:15px;padding:7px 10px;box-sizing:border-box;outline:none;"></div>
+        <div style="flex:2;"><div style="color:#6b7a90;font-size:12px;margin-bottom:4px;">Feel</div><select onchange="setSessionField('feel',this.value)" style="width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:${sData.feel?"#e8edf5":"#6b7a90"};font-size:14px;padding:8px 10px;box-sizing:border-box;outline:none;">${feelOpts}</select></div>
+      </div>
+      <textarea rows="2" placeholder="Note..." onchange="setSessionField('sessionNote',this.value)" style="width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#c8d4e8;font-size:13px;padding:7px 10px;box-sizing:border-box;resize:none;outline:none;">${esc(sData.sessionNote)}</textarea>`;
+  }
+}
+
+function renderDayTabs() {
+  const el=document.getElementById("day-tabs"); if(!el) return;
+  el.innerHTML=DAYS.map(d=>{
+    const s=getSess(S.weekOffset,d);
+    const has=!!(s.feel||s.rpe||s.yogaDone||s.fridgePick||s.restDay);
+    const act=S.selectedDay===d;
+    return `<button onclick="selectDay('${d}')" style="flex-shrink:0;padding:8px 14px;border-radius:20px;border:${act?"none":"1px solid #2a3545"};background:${act?"#4ade80":"#141b26"};color:${act?"#0f1117":has?"#c8d4e8":"#6b7a90"};font-weight:700;font-size:14px;cursor:pointer;position:relative;">${d}${has&&!act?`<span style="position:absolute;top:4px;right:4px;width:5px;height:5px;border-radius:50%;background:#4ade80;"></span>`:""}</button>`;
+  }).join("");
+}
+
+function renderHeader() {
+  const tue=getSess(S.weekOffset,"Tue"),fri=getSess(S.weekOffset,"Fri");
+  const yc=(tue.yogaDone?1:0)+(fri.fridgePick==="fri-yoga"?1:0);
+  const yb=document.getElementById("yoga-badge");
+  if(yb){yb.style.background=yc>=2?"#4ade80":"#1a2030";yb.style.color=yc>=2?"#0f1117":"#6b7a90";yb.textContent=`🧘 ${yc}/2 yoga`;}
+  const wl=document.getElementById("week-label"); if(wl) wl.textContent="WEEK OF "+fmtDate(getWeekKey(S.weekOffset)).toUpperCase();
+  const dl=document.getElementById("day-label"); if(dl) dl.textContent=DAY_LABELS[S.selectedDay].toUpperCase();
+  const wn=document.getElementById("week-nav-label"); if(wn) wn.textContent=S.weekOffset===0?"This week":S.weekOffset===-1?"Last week":Math.abs(S.weekOffset)+"w ago";
+}
+
+function renderLog() {
+  const el=document.getElementById("log-content"); if(!el) return;
+  const weeks=[-2,-1,0].map(off=>{
+    const wk=getWeekKey(off);
+    const entries=DAYS.map(d=>({day:d,data:S.sessions[wk+"_"+d]||{}})).filter(({data})=>data.feel||data.rpe||data.sessionNote||data.restDay||data.yogaDone||data.fridgePick);
+    return{weekStart:wk,entries};
+  }).filter(w=>w.entries.length>0);
+  if(!weeks.length){el.innerHTML=`<div style="text-align:center;color:#6b7a90;margin-top:60px;"><div style="font-size:32px;margin-bottom:12px;">📓</div><div>No sessions logged yet.</div></div>`;return;}
+  el.innerHTML=weeks.reverse().map(({weekStart,entries})=>`
+    <div style="margin-bottom:28px;">
+      <div style="color:#4ade80;font-size:12px;font-weight:700;letter-spacing:1px;margin-bottom:10px;">WEEK OF ${fmtDate(weekStart).toUpperCase()}</div>
+      ${entries.map(({day,data})=>`
+        <div style="background:#141b26;border-radius:10px;padding:12px 14px;margin-bottom:8px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+            <span style="color:#e8edf5;font-weight:700;">${day} — ${DAY_LABELS[day]}</span>
+            <span style="color:#6b7a90;font-size:13px;">${data.feel||""}</span>
+          </div>
+          ${data.restDay?`<div style="color:#6b7a90;font-size:13px;">🛋 Rest day</div>`:""}
+          ${!data.restDay&&data.rpe?`<div style="color:#6b7a90;font-size:13px;">RPE ${data.rpe}/10</div>`:""}
+          ${data.sessionNote?`<div style="color:#9bacc0;font-size:13px;margin-top:4px;font-style:italic;">"${esc(data.sessionNote)}"</div>`:""}
+          ${data.fridgePick?(()=>{const o=FRI_OPTIONS.find(f=>f.id===data.fridgePick);return o?`<div style="color:#4ade80;font-size:13px;margin-top:4px;">${o.emoji} ${o.label}</div>`:""})():""}
+        </div>`).join("")}
+    </div>`).join("");
+}
+
+function renderRecovery() {
+  const el=document.getElementById("recovery-content"); if(!el) return;
+  const tk=todayKey(),ak=S.recoveryActiveKey;
+  const aData=S.recovery[ak]||{};
+  const keys=last7();
+  const hrvVals=keys.map(k=>({date:k,hrv:S.recovery[k]?.hrv,load:S.recovery[k]?.load}));
+  const hasHRV=hrvVals.some(v=>v.hrv);
+  const recent=keys.map(k=>S.recovery[k]?.hrv).filter(Boolean).map(Number);
+  let streak=0;
+  if(recent.length>=3){for(let i=recent.length-1;i>0;i--){if(recent[i]<recent[i-1])streak++;else break;}}
+  const alert=streak>=3;
+  const dayPills=keys.map(k=>{
+    const dn=new Date(k+"T12:00:00").toLocaleDateString("en-US",{weekday:"short"});
+    const hasE=!!(S.recovery[k]?.hrv),isAct=k===ak;
+    return `<button onclick="setRecoveryDay('${k}')" style="flex-shrink:0;padding:6px 10px;border-radius:20px;border:${isAct?"none":"1px solid #2a3545"};background:${isAct?"#4ade80":"#141b26"};color:${isAct?"#0f1117":hasE?"#c8d4e8":"#6b7a90"};font-weight:700;font-size:13px;cursor:pointer;position:relative;">${k===tk?"Today":dn}${hasE&&!isAct?`<span style="position:absolute;top:2px;right:2px;width:5px;height:5px;border-radius:50%;background:#4ade80;"></span>`:""}</button>`;
+  }).join("");
+  const loadBtns=[["normal","Normal"],["heavy","Heavy"],["a lot","A lot going on"]].map(([v,l])=>`<button onclick="setRecoveryLoad('${v}')" style="flex:1;padding:10px 6px;border-radius:8px;border:${aData.load===v?"none":"1px solid #2a3545"};background:${aData.load===v?lc(v):"#1a2030"};color:${aData.load===v?"#0f1117":"#9bacc0"};font-weight:600;font-size:12px;cursor:pointer;line-height:1.3;">${l}</button>`).join("");
+  let trendHTML="";
+  if(hasHRV){
+    const vals=hrvVals.map(v=>Number(v.hrv)||null);
+    const max=Math.max(...vals.filter(Boolean)),min=Math.min(...vals.filter(Boolean)),range=max-min||1;
+    const bars=hrvVals.map((v,i)=>{
+      const val=Number(v.hrv)||null,h=val?Math.max(12,((val-min)/range)*64+12):4,isAct=v.date===ak;
+      const dn=new Date(v.date+"T12:00:00").toLocaleDateString("en-US",{weekday:"short"});
+      return `<div onclick="setRecoveryDay('${v.date}')" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;">
+        <div style="font-size:10px;color:#6b7a90;">${val||""}</div>
+        <div style="width:100%;height:${h}px;border-radius:4px;background:${!val?"#1a2030":v.date===tk?"#4ade80":v.load?lc(v.load):"#3a5a80"};outline:${isAct?"2px solid #fff":"none"};"></div>
+        <div style="font-size:10px;color:${isAct?"#e8edf5":"#6b7a90"};">${dn}</div>
+      </div>`;
+    }).join("");
+    trendHTML=`<div style="background:#141b26;border-radius:10px;padding:14px;">
+      <div style="color:#4ade80;font-size:12px;font-weight:700;letter-spacing:1px;margin-bottom:12px;">7-DAY TREND</div>
+      <div style="display:flex;align-items:flex-end;gap:4px;height:80px;margin-bottom:10px;">${bars}</div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;">${[["#4ade80","Normal"],["#fbbf24","Heavy"],["#f87171","A lot going on"],["#3a5a80","No load logged"]].map(([c,l])=>`<div style="display:flex;align-items:center;gap:4px;"><div style="width:8px;height:8px;border-radius:2px;background:${c};"></div><span style="color:#6b7a90;font-size:11px;">${l}</span></div>`).join("")}</div>
+    </div>`;
+  }
+  const dateLabel=ak===tk?"TODAY":new Date(ak+"T12:00:00").toLocaleDateString("en-US",{weekday:"long",month:"short",day:"numeric"}).toUpperCase();
+  el.innerHTML=`
+    ${alert?`<div style="background:#2d1515;border:1px solid #f87171;border-radius:10px;padding:12px 14px;margin-bottom:16px;"><div style="color:#f87171;font-weight:700;font-size:14px;margin-bottom:4px;">HRV down ${streak} days in a row</div><div style="color:#9bacc0;font-size:13px;">Injury risk elevated. Dial back today — not forever, just today.</div></div>`:""}
+    <div style="display:flex;gap:4px;margin-bottom:14px;overflow-x:auto;">${dayPills}</div>
+    <div style="background:#141b26;border-radius:10px;padding:14px;margin-bottom:16px;">
+      <div style="color:#4ade80;font-size:12px;font-weight:700;letter-spacing:1px;margin-bottom:12px;">${dateLabel}</div>
+      <div style="margin-bottom:12px;"><div style="color:#6b7a90;font-size:12px;margin-bottom:4px;">HRV (from Whoop or Apple Watch)</div>
+        <input type="number" value="${esc(aData.hrv)}" placeholder="e.g. 68" onchange="setRecoveryHRV(this.value)"
+          style="width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#e8edf5;font-size:22px;font-weight:700;padding:10px 12px;box-sizing:border-box;outline:none;text-align:center;"></div>
+      <div><div style="color:#6b7a90;font-size:12px;margin-bottom:8px;">Life load</div><div style="display:flex;gap:8px;">${loadBtns}</div></div>
+    </div>
+    ${trendHTML}`;
+}
+
+function renderAll() {
+  // Build shell on first run
+  if(!document.getElementById("app-shell")) {
+    document.getElementById("app").innerHTML = `
+      <div id="app-shell">
+        <div style="background:#0f1117;padding:16px 18px 0;position:sticky;top:0;z-index:10;border-bottom:1px solid #1e2530;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <div><div style="font-size:18px;font-weight:700;">Training</div><div id="week-label" style="font-size:12px;color:#6b7a90;letter-spacing:1px;"></div></div>
+            <div id="yoga-badge" style="border-radius:20px;padding:4px 10px;font-size:12px;font-weight:700;"></div>
+          </div>
+          <div style="display:flex;gap:4px;" id="nav-bar"></div>
+        </div>
+        <div id="workouts-view" style="padding:16px 18px 80px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+            <button onclick="weekBack()" style="background:none;border:none;color:#6b7a90;font-size:20px;cursor:pointer;">&#8249;</button>
+            <span id="week-nav-label" style="color:#6b7a90;font-size:13px;"></span>
+            <button onclick="weekFwd()" style="background:none;border:none;color:#6b7a90;font-size:20px;cursor:pointer;">&#8250;</button>
+          </div>
+          <div id="day-tabs" style="display:flex;gap:6px;margin-bottom:18px;overflow-x:auto;"></div>
+          <div id="day-label" style="color:#6b7a90;font-size:12px;letter-spacing:1px;margin-bottom:12px;"></div>
+          <div id="day-content"></div>
+        </div>
+        <div id="recovery-view" style="padding:16px 18px 80px;display:none;"><div id="recovery-content"></div></div>
+        <div id="log-view" style="padding:16px 18px 80px;display:none;"><div id="log-content"></div></div>
+        <div id="save-badge" style="display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);border:1px solid;border-radius:20px;padding:7px 16px;font-size:13px;z-index:100;white-space:nowrap;"></div>
+      </div>`;
+  }
+
+  // Nav
+  const nav=document.getElementById("nav-bar");
+  if(nav) nav.innerHTML=[["today","Workouts"],["recovery","Recovery"],["log","Log"]].map(([v,label])=>`<button onclick="setView('${v}')" style="flex:1;padding:8px 0;border-radius:8px 8px 0 0;border:none;background:${S.view===v?"#141b26":"transparent"};color:${S.view===v?"#e8edf5":"#6b7a90"};font-weight:600;font-size:14px;cursor:pointer;">${label}</button>`).join("");
+
+  // Views
+  ["workouts-view","recovery-view","log-view"].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display="none";});
+  const activeId=S.view==="today"?"workouts-view":S.view==="recovery"?"recovery-view":"log-view";
+  const av=document.getElementById(activeId); if(av) av.style.display="block";
+
+  renderHeader();
+  renderDayTabs();
+  renderDay();
+  renderLog();
+  renderRecovery();
+}
+
+// ── Boot ─────────────────────────────────────────────────────────────────────
+try {
+  renderAll();
+  if(FIREBASE_CONFIG) loadFromFirebase();
+} catch(e) {
+  document.getElementById("app").innerHTML = '<div style="padding:24px;color:#f87171;font-size:14px;font-family:Georgia,serif;"><strong>Error:</strong> ' + e.message + '<br><br>' + e.stack + '</div>';
+}
+</script>
+</body>
+</html>
