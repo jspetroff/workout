@@ -478,6 +478,14 @@ function renderRecovery() {
           style="width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#e8edf5;font-size:22px;font-weight:700;padding:10px 12px;box-sizing:border-box;outline:none;text-align:center;"></div>
       <div><div style="color:#6b7a90;font-size:12px;margin-bottom:8px;">Life load</div><div style="display:flex;gap:8px;">${loadBtns}</div></div>
     </div>
+    ${aData.hrv && aData.load ? `
+    <button onclick="getReadiness()" style="width:100%;padding:12px 0;border-radius:10px;border:none;background:#4ade80;color:#0f1117;font-weight:700;font-size:15px;cursor:pointer;margin-bottom:16px;">
+      Get today's workout recommendation
+    </button>
+    <div id="readiness-result" style="margin-bottom:16px;"></div>` : `
+    <div style="background:#141b26;border-radius:10px;padding:12px 14px;margin-bottom:16px;color:#6b7a90;font-size:13px;text-align:center;">
+      Enter HRV and life load above to get a workout recommendation
+    </div>`}
     ${trendHTML}`;
 }
 
@@ -521,6 +529,51 @@ function renderAll() {
   renderLog();
   renderRecovery();
 }
+
+// ── Readiness Recommendation ─────────────────────────────────────────────────
+
+window.getReadiness = async function() {
+  const el = document.getElementById("readiness-result");
+  if(!el) return;
+  el.innerHTML = '<div style="background:#141b26;border-radius:10px;padding:12px 14px;color:#6b7a90;font-size:13px;">Getting recommendation...</div>';
+
+  const ak = S.recoveryActiveKey;
+  const hrv = S.recovery[ak]?.hrv;
+  const load = S.recovery[ak]?.load;
+
+  // Get last 5 sessions for context
+  const recentSessions = [];
+  for(let i = 0; i < 7; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const dateKey = d.toISOString().slice(0,10);
+    const dayName = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.getDay()];
+    const sess = S.sessions[getWeekKey(0) + "_" + dayName] || S.sessions[getWeekKey(-1) + "_" + dayName];
+    if(sess && (sess.rpe || sess.feel)) {
+      recentSessions.push({ day: dayName, rpe: sess.rpe, feel: sess.feel });
+    }
+  }
+
+  const todayDay = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][new Date().getDay()];
+  const planMap = { Mon: "Strength (Plans A/B/C)", Tue: "Yoga", Wed: "N4x4 or Swim", Thu: "Strength + Explosive (Plans A/B/C)", Fri: "Variable" };
+  const todayPlan = planMap[todayDay] || "rest day";
+
+  try {
+    const res = await fetch("https://getreadiness-5iz3hgmcda-uc.a.run.app", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ hrv, load, recentSessions, todayPlan })
+    });
+    const data = await res.json();
+    const text = data.recommendation || "Could not get recommendation.";
+    el.innerHTML = `<div style="background:#141b26;border-radius:10px;padding:14px;border:1px solid #1e3a2a;">
+      <div style="color:#4ade80;font-size:12px;font-weight:700;letter-spacing:1px;margin-bottom:8px;">TODAY'S RECOMMENDATION</div>
+      <div style="color:#c8d4e8;font-size:14px;line-height:1.6;">${text}</div>
+    </div>`;
+  } catch(err) {
+    el.innerHTML = '<div style="color:#f87171;font-size:13px;padding:10px 0;">Could not get recommendation.</div>';
+  }
+};
 
 // ── HR Chart Analysis — calls Cloud Function (API key is secure server-side) ──
 
