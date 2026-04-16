@@ -149,7 +149,10 @@ async function initFirebase() {
 
 async function loadFromFirebase() {
   const ok = await initFirebase();
-  if(!ok) return;
+  if(!ok) {
+    showBanner("Firebase not initialized", "error");
+    return;
+  }
   try {
     const snap = await window._fbGetDoc(DOC_REF);
     if(snap.exists()) {
@@ -157,8 +160,21 @@ async function loadFromFirebase() {
       S.sessions = data.sessions||{};
       S.recovery = data.recovery||{};
       renderAll();
+      showBanner("Data loaded", "saved");
+    } else {
+      showBanner("No saved data found", "saving");
     }
-  } catch(e) { console.error("Load failed:", e); }
+  } catch(e) {
+    console.error("Load failed:", e);
+    showBanner("Load failed: " + e.message, "error");
+  }
+}
+
+function showBanner(msg, type) {
+  setSaveStatus(type);
+  const el = document.getElementById("save-badge");
+  if(el) el.textContent = msg;
+  setTimeout(()=>setSaveStatus("idle"), 4000);
 }
 
 async function saveToFirebase() {
