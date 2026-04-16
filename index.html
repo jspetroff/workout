@@ -13,13 +13,8 @@ input, select, textarea, button { font-family: Georgia, serif; }
 </style>
 </head>
 <body>
-
-<!-- App renders immediately -->
 <div id="app"></div>
-
 <script>
-// ── Firebase config ───────────────────────────────────────────────────────────
-// Paste your Firebase config here after setup
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyDAhu0JEG-gQiCVIHu2PrUMq9kG3LuLrhg",
   authDomain: "jp-workout.firebaseapp.com",
@@ -28,8 +23,6 @@ const FIREBASE_CONFIG = {
   messagingSenderId: "998100432483",
   appId: "1:998100432483:web:eac515f401a44a5154ea56"
 };
-
-// ── Data ──────────────────────────────────────────────────────────────────────
 
 const MONDAY = [
   { id:"mon-a", label:"A", theme:"Squat + Vertical Pull + Ankle Rebuild", blocks:[
@@ -98,8 +91,6 @@ const FRI_OPTIONS = [
 const DAYS = ["Mon","Tue","Wed","Thu","Fri"];
 const DAY_LABELS = {Mon:"Strength",Tue:"Yoga + Cold",Wed:"N4x4 or Swim",Thu:"Strength + Explosive",Fri:"Variable"};
 
-// ── State ─────────────────────────────────────────────────────────────────────
-
 const S = {
   sessions: {}, recovery: {},
   view: "today", weekOffset: 0,
@@ -111,11 +102,9 @@ const S = {
 
 let saveTimer = null;
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
 function getWeekKey(off) {
   const now = new Date();
-  const day = now.getDay(); // 0=Sun
+  const day = now.getDay();
   const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (day === 0 ? 6 : day - 1) + (off||0)*7);
   const yyyy = monday.getFullYear();
   const mm = String(monday.getMonth()+1).padStart(2,'0');
@@ -131,8 +120,6 @@ function lc(load) { return load==="normal"?"#4ade80":load==="heavy"?"#fbbf24":lo
 function sKey(off,day) { return getWeekKey(off)+"_"+day; }
 function getSess(off,day) { return S.sessions[sKey(off,day)]||{}; }
 function esc(s) { return (s||"").replace(/"/g,"&quot;").replace(/</g,"&lt;"); }
-
-// ── Firebase (lazy) ───────────────────────────────────────────────────────────
 
 let db = null;
 let DOC_REF = null;
@@ -153,10 +140,7 @@ async function initFirebase() {
 
 async function loadFromFirebase() {
   const ok = await initFirebase();
-  if(!ok) {
-    showBanner("Firebase not initialized", "error");
-    return;
-  }
+  if(!ok) { showBanner("Firebase not initialized", "error"); return; }
   try {
     const snap = await window._fbGetDoc(DOC_REF);
     if(snap.exists()) {
@@ -169,7 +153,6 @@ async function loadFromFirebase() {
       showBanner("No saved data found", "saving");
     }
   } catch(e) {
-    console.error("Load failed:", e);
     showBanner("Load failed: " + e.message, "error");
   }
 }
@@ -189,7 +172,6 @@ async function saveToFirebase() {
     setSaveStatus("saved");
     setTimeout(()=>setSaveStatus("idle"),2000);
   } catch(e) {
-    console.error("Save failed:", e);
     setSaveStatus("error");
     setTimeout(()=>setSaveStatus("idle"),3000);
   }
@@ -210,10 +192,8 @@ function setSaveStatus(s) {
   el.style.background = s==="saved"?"#1e3a2a":s==="error"?"#2d1515":"#1a2030";
   el.style.borderColor = s==="saved"?"#4ade80":s==="error"?"#f87171":"#2a3545";
   el.style.color = s==="saved"?"#4ade80":s==="error"?"#f87171":"#6b7a90";
-  el.textContent = s==="saving"?"Saving...":s==="saved"?"✓ Saved":"✗ Save failed — check Firebase config";
+  el.textContent = s==="saving"?"Saving...":s==="saved"?"✓ Saved":"✗ Save failed";
 }
-
-// ── Event handlers ────────────────────────────────────────────────────────────
 
 window.setView = v => { S.view=v; renderAll(); };
 window.selectDay = d => { S.selectedDay=d; renderAll(); };
@@ -263,8 +243,6 @@ window.setRecoveryLoad = val => {
   S.recovery[ak]={...(S.recovery[ak]||{}),load:val};
   scheduleSave(); renderRecovery();
 };
-
-// ── Render ────────────────────────────────────────────────────────────────────
 
 function workoutCardHTML(workout,sData) {
   const checked=sData.checked||{}, notes=sData.notes||{};
@@ -504,7 +482,6 @@ function renderRecovery() {
 }
 
 function renderAll() {
-  // Build shell on first run
   if(!document.getElementById("app-shell")) {
     document.getElementById("app").innerHTML = `
       <div id="app-shell">
@@ -531,11 +508,9 @@ function renderAll() {
       </div>`;
   }
 
-  // Nav
   const nav=document.getElementById("nav-bar");
   if(nav) nav.innerHTML=[["today","Workouts"],["recovery","Recovery"],["log","Log"]].map(([v,label])=>`<button onclick="setView('${v}')" style="flex:1;padding:8px 0;border-radius:8px 8px 0 0;border:none;background:${S.view===v?"#141b26":"transparent"};color:${S.view===v?"#e8edf5":"#6b7a90"};font-weight:600;font-size:14px;cursor:pointer;">${label}</button>`).join("");
 
-  // Views
   ["workouts-view","recovery-view","log-view"].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display="none";});
   const activeId=S.view==="today"?"workouts-view":S.view==="recovery"?"recovery-view":"log-view";
   const av=document.getElementById(activeId); if(av) av.style.display="block";
@@ -547,7 +522,7 @@ function renderAll() {
   renderRecovery();
 }
 
-// ── HR Chart Analysis ────────────────────────────────────────────────────────
+// ── HR Chart Analysis — calls Cloud Function (API key is secure server-side) ──
 
 window.analyzeHRChart = async function(event) {
   const file = event.target.files[0];
@@ -561,40 +536,23 @@ window.analyzeHRChart = async function(event) {
     const base64 = e.target.result.split(",")[1];
     const mediaType = file.type || "image/jpeg";
     try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
+      const res = await fetch("https://analyzehr-5iz3hgmcda-uc.a.run.app", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-haiku-4-5-20251001",
-          max_tokens: 600,
-          messages: [{
-            role: "user",
-            content: [
-              {
-                type: "image",
-                source: { type: "base64", media_type: mediaType, data: base64 }
-              },
-              {
-                type: "text",
-                text: "This is a heart rate chart from a Norwegian 4x4 interval run. The target work interval zone is 170-177 bpm, recovery should drop below 130 bpm. Analyze each of the 4 work reps: estimate the average HR during each rep, note whether recovery drops below 130, and give a 1-2 sentence overall assessment of how well the protocol was executed. Be concise and specific. Format as: Rep 1: ~X bpm avg. Rep 2: ~X bpm avg. Rep 3: ~X bpm avg. Rep 4: ~X bpm avg. Recovery: [note]. Overall: [1-2 sentences]."
-              }
-            ]
-          }]
-        })
+        body: JSON.stringify({ imageBase64: base64, mediaType: mediaType })
       });
       const data = await res.json();
-      const text = data.content?.[0]?.text || "Could not analyze image.";
+      const text = data.analysis || "Could not analyze image.";
       el.innerHTML = `<div style="background:#141b26;border-radius:8px;padding:12px;margin-top:4px;color:#c8d4e8;font-size:13px;line-height:1.6;white-space:pre-wrap;">${text}</div>`;
-      // Save analysis to session
       setSessionField('hrAnalysis', text);
     } catch(err) {
-      el.innerHTML = '<div style="color:#f87171;font-size:13px;padding:10px 0;">Analysis failed. Check your connection.</div>';
+      el.innerHTML = '<div style="color:#f87171;font-size:13px;padding:10px 0;">Analysis failed: ' + err.message + '</div>';
     }
   };
   reader.readAsDataURL(file);
 };
 
-// ── Boot ─────────────────────────────────────────────────────────────────────
+// ── Boot ──────────────────────────────────────────────────────────────────────
 try {
   renderAll();
   if(FIREBASE_CONFIG) loadFromFirebase();
