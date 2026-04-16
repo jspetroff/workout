@@ -355,10 +355,18 @@ function renderDay() {
         <button onclick="setSessionField('modality','swim')" style="flex:1;padding:10px 0;border-radius:8px;border:${isS?"none":"1px solid #2a3545"};background:${isS?"#4ade80":"#1a2030"};color:${isS?"#0f1117":"#9bacc0"};font-weight:600;font-size:14px;cursor:pointer;">🏊 Pool w/ Kevin</button>
       </div>
       <div style="display:flex;gap:8px;margin-bottom:10px;">
-        <div style="flex:1;"><div style="color:#6b7a90;font-size:12px;margin-bottom:4px;">Peak HR (bpm)</div><input type="number" value="${esc(sData.peakHR)}" onchange="setSessionField('peakHR',this.value)" style="width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#e8edf5;font-size:15px;padding:7px 10px;box-sizing:border-box;outline:none;"></div>
+        <div style="flex:1;"><div style="color:#6b7a90;font-size:12px;margin-bottom:4px;">Avg HR work intervals</div><input type="number" value="${esc(sData.avgHR)}" onchange="setSessionField('avgHR',this.value)" style="width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#e8edf5;font-size:15px;padding:7px 10px;box-sizing:border-box;outline:none;"></div>
         <div style="flex:1;"><div style="color:#6b7a90;font-size:12px;margin-bottom:4px;">RPE (1-10)</div><input type="number" min="1" max="10" value="${esc(sData.rpe)}" onchange="setSessionField('rpe',this.value)" style="width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#e8edf5;font-size:15px;padding:7px 10px;box-sizing:border-box;outline:none;"></div>
       </div>
       <textarea rows="2" placeholder="Intervals felt... ankle... Kevin's splits..." onchange="setSessionField('sessionNote',this.value)" style="width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#c8d4e8;font-size:13px;padding:7px 10px;box-sizing:border-box;resize:none;outline:none;">${esc(sData.sessionNote)}</textarea>
+      <div style="margin-top:14px;">
+        <div style="color:#6b7a90;font-size:12px;margin-bottom:8px;">HR CHART ANALYSIS</div>
+        <label style="display:block;padding:12px;background:#141b26;border:1px dashed #2a3545;border-radius:8px;text-align:center;cursor:pointer;color:#6b7a90;font-size:13px;">
+          📈 Upload HR chart for rep analysis
+          <input type="file" accept="image/*" onchange="analyzeHRChart(event)" style="display:none;">
+        </label>
+        <div id="hr-analysis" style="margin-top:10px;">${sData.hrAnalysis ? `<div style="background:#141b26;border-radius:8px;padding:12px;margin-top:4px;color:#c8d4e8;font-size:13px;line-height:1.6;white-space:pre-wrap;">${esc(sData.hrAnalysis)}</div>` : ""}</div>
+      </div>
       ${restBtn()}`;
   } else if(d==="Thu") {
     const pre=sData.plungePreLift,skip=sData.plungeSkipped;
@@ -538,6 +546,53 @@ function renderAll() {
   renderLog();
   renderRecovery();
 }
+
+// ── HR Chart Analysis ────────────────────────────────────────────────────────
+
+window.analyzeHRChart = async function(event) {
+  const file = event.target.files[0];
+  if(!file) return;
+  const el = document.getElementById("hr-analysis");
+  if(!el) return;
+  el.innerHTML = '<div style="color:#6b7a90;font-size:13px;padding:10px 0;">Analyzing your HR chart...</div>';
+
+  const reader = new FileReader();
+  reader.onload = async function(e) {
+    const base64 = e.target.result.split(",")[1];
+    const mediaType = file.type || "image/jpeg";
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-haiku-4-5-20251001",
+          max_tokens: 600,
+          messages: [{
+            role: "user",
+            content: [
+              {
+                type: "image",
+                source: { type: "base64", media_type: mediaType, data: base64 }
+              },
+              {
+                type: "text",
+                text: "This is a heart rate chart from a Norwegian 4x4 interval run. The target work interval zone is 170-177 bpm, recovery should drop below 130 bpm. Analyze each of the 4 work reps: estimate the average HR during each rep, note whether recovery drops below 130, and give a 1-2 sentence overall assessment of how well the protocol was executed. Be concise and specific. Format as: Rep 1: ~X bpm avg. Rep 2: ~X bpm avg. Rep 3: ~X bpm avg. Rep 4: ~X bpm avg. Recovery: [note]. Overall: [1-2 sentences]."
+              }
+            ]
+          }]
+        })
+      });
+      const data = await res.json();
+      const text = data.content?.[0]?.text || "Could not analyze image.";
+      el.innerHTML = `<div style="background:#141b26;border-radius:8px;padding:12px;margin-top:4px;color:#c8d4e8;font-size:13px;line-height:1.6;white-space:pre-wrap;">${text}</div>`;
+      // Save analysis to session
+      setSessionField('hrAnalysis', text);
+    } catch(err) {
+      el.innerHTML = '<div style="color:#f87171;font-size:13px;padding:10px 0;">Analysis failed. Check your connection.</div>';
+    }
+  };
+  reader.readAsDataURL(file);
+};
 
 // ── Boot ─────────────────────────────────────────────────────────────────────
 try {
