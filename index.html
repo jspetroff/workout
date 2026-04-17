@@ -372,11 +372,31 @@ function renderDay() {
     const pick=sData.fridgePick;
     const thu=getSess(S.weekOffset,"Thu"),tue=getSess(S.weekOffset,"Tue");
     const thuRpe=parseInt(thu.rpe)||0;
+    const todayHRV = S.recovery[todayKey()];
+    const hrvAlert = (() => {
+      const keys = last7();
+      const recent = keys.map(k=>S.recovery[k]?.hrv).filter(Boolean).map(Number);
+      if(recent.length < 3) return false;
+      let streak = 0;
+      for(let i=recent.length-1;i>0;i--){ if(recent[i]<recent[i-1]) streak++; else break; }
+      return streak >= 3;
+    })();
+
     let sugg=[];
-    if(tue.yogaDone){sugg.push({id:"fri-pilates",reason:"You did yoga Tue — Pilates without stacking hot flows."});sugg.push({id:"fri-swim",reason:"Pool is open. Low-impact, ankle-friendly."});}
-    else sugg.push({id:"fri-yoga",reason:"Haven't done yoga yet this week — hit the studio."});
-    if(thuRpe>=8) sugg.push({id:"fri-run-z2",reason:"Thu was heavy — Zone 2 is a flush, not a session."});
-    else if(thuRpe<=5&&thuRpe>0) sugg.push({id:"fri-n4x4",reason:"Thu was light — you've got legs for N4x4."});
+    // Recovery-first logic: if HRV is down 3+ days or life load is heavy, nudge toward rest/easy
+    if(hrvAlert || todayHRV?.load === "a lot") {
+      sugg.push({id:"fri-rest",reason:"HRV has been trending down — your body is asking for it."});
+      sugg.push({id:"fri-run-z2",reason:"If you move, keep it easy. Zone 2 only, no intensity."});
+    } else if(todayHRV?.load === "heavy") {
+      sugg.push({id:"fri-pilates",reason:"Life load is heavy — Pilates is controlled, low stress."});
+      if(tue.yogaDone) sugg.push({id:"fri-swim",reason:"Pool is low-impact and won't add to the load."});
+      else sugg.push({id:"fri-yoga",reason:"Haven't done yoga this week — studio is a good reset."});
+    } else {
+      if(tue.yogaDone){sugg.push({id:"fri-pilates",reason:"You did yoga Tue — Pilates without stacking hot flows."});sugg.push({id:"fri-swim",reason:"Pool is open. Low-impact, ankle-friendly."});}
+      else sugg.push({id:"fri-yoga",reason:"Haven't done yoga yet this week — hit the studio."});
+      if(thuRpe>=8) sugg.push({id:"fri-run-z2",reason:"Thu was heavy — Zone 2 is a flush, not a session."});
+      else if(thuRpe<=5&&thuRpe>0) sugg.push({id:"fri-n4x4",reason:"Thu was light — you've got legs for N4x4."});
+    }
     sugg=sugg.slice(0,2);
     const suggHTML=sugg.length?`<div style="background:#0d1520;border-radius:8px;padding:10px 12px;border:1px solid #1e3a2a;margin-bottom:14px;"><div style="color:#4ade80;font-size:12px;font-weight:700;margin-bottom:6px;">SUGGESTED</div>${sugg.map(s=>{const o=FRI_OPTIONS.find(f=>f.id===s.id);return o?`<div style="color:#9bacc0;font-size:13px;margin-bottom:4px;">${o.emoji} <strong style="color:#c8d4e8;">${o.label}</strong> — ${s.reason}</div>`:""}).join("")}</div>`:"";
     const pickBtns=FRI_OPTIONS.map(o=>`<button onclick="setSessionField('fridgePick','${o.id}')" style="padding:8px 14px;border-radius:20px;border:${pick===o.id?"none":"1px solid #2a3545"};background:${pick===o.id?"#4ade80":"#1a2030"};color:${pick===o.id?"#0f1117":"#9bacc0"};font-weight:600;font-size:13px;cursor:pointer;">${o.emoji} ${o.label}</button>`).join("");
@@ -472,7 +492,10 @@ function renderRecovery() {
       </div>`;
     }).join("");
     trendHTML=`<div style="background:#141b26;border-radius:10px;padding:14px;">
-      <div style="color:#4ade80;font-size:12px;font-weight:700;letter-spacing:1px;margin-bottom:12px;">7-DAY TREND</div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;">
+        <div style="color:#4ade80;font-size:12px;font-weight:700;letter-spacing:1px;">7-DAY TREND</div>
+        ${(()=>{ const avg = Math.round(vals.filter(Boolean).reduce((a,b)=>a+b,0)/(vals.filter(Boolean).length||1)); return vals.filter(Boolean).length ? `<div style="color:#6b7a90;font-size:12px;">7-day avg: <span style="color:#e8edf5;font-weight:700;">${avg}</span></div>` : ""; })()}
+      </div>
       <div style="display:flex;align-items:flex-end;gap:4px;height:80px;margin-bottom:10px;">${bars}</div>
       <div style="display:flex;gap:12px;flex-wrap:wrap;">${[["#4ade80","Normal"],["#fbbf24","Heavy"],["#f87171","A lot going on"],["#3a5a80","No load logged"]].map(([c,l])=>`<div style="display:flex;align-items:center;gap:4px;"><div style="width:8px;height:8px;border-radius:2px;background:${c};"></div><span style="color:#6b7a90;font-size:11px;">${l}</span></div>`).join("")}</div>
     </div>`;
