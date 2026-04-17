@@ -564,6 +564,7 @@ window.getReadiness = async function() {
     }
   }
 
+  // Always recommend for today's actual day
   const todayDay = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][new Date().getDay()];
   const planMap = { Mon: "Strength (Plans A/B/C)", Tue: "Yoga", Wed: "N4x4 or Swim", Thu: "Strength + Explosive (Plans A/B/C)", Fri: "Variable" };
   const todayPlan = planMap[todayDay] || "rest day";
