@@ -97,7 +97,7 @@ const S = {
   selectedDay: ({1:"Mon",2:"Tue",3:"Wed",4:"Thu",5:"Fri"})[new Date().getDay()] || "Mon",
   monPlan: 0, thuPlan: 0,
   saveStatus: "idle",
-  recoveryActiveKey: new Date().toISOString().slice(0,10),
+  recoveryActiveKey: (()=>{ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })(),
 };
 
 let saveTimer = null;
@@ -112,9 +112,22 @@ function getWeekKey(off) {
   return `${yyyy}-${mm}-${dd}`;
 }
 function fmtDate(iso) { return new Date(iso+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric"}); }
-function todayKey() { return new Date().toISOString().slice(0,10); }
+function todayKey() {
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  const dd = String(d.getDate()).padStart(2,'0');
+  return `${yyyy}-${mm}-${dd}`;
+}
 function last7() {
-  return Array.from({length:7},(_,i)=>{ const d=new Date(); d.setDate(d.getDate()-(6-i)); return d.toISOString().slice(0,10); });
+  return Array.from({length:7},(_,i)=>{
+    const d=new Date();
+    d.setDate(d.getDate()-(6-i));
+    const yyyy=d.getFullYear();
+    const mm=String(d.getMonth()+1).padStart(2,'0');
+    const dd=String(d.getDate()).padStart(2,'0');
+    return `${yyyy}-${mm}-${dd}`;
+  });
 }
 function lc(load) { return load==="normal"?"#4ade80":load==="heavy"?"#fbbf24":load==="a lot"?"#f87171":"#2a3545"; }
 function sKey(off,day) { return getWeekKey(off)+"_"+day; }
@@ -589,8 +602,14 @@ window.getReadiness = async function() {
 
   // Always recommend for today's actual day
   const todayDay = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][new Date().getDay()];
-  const planMap = { Mon: "Strength (Plans A/B/C)", Tue: "Yoga", Wed: "N4x4 or Swim", Thu: "Strength + Explosive (Plans A/B/C)", Fri: "Variable" };
-  const todayPlan = planMap[todayDay] || "rest day";
+  const planMap = {
+    Mon: "Monday Strength — choose Plan A (Squat + Vertical Pull + Ankle Rebuild), Plan B (Bulgarian Split Squat + Row + Balance), or Plan C (Squat Variation + Horizontal Pull + Glute Accessory)",
+    Tue: "Tuesday Yoga — Leigh's heated vinyasa class",
+    Wed: "Wednesday N4x4 Run or Pool Swim with Kevin",
+    Thu: "Thursday Strength + Explosive — choose Plan A (Hinge Heavy + Explosive Finish), Plan B (Power Day: Jumps + RDL), or Plan C (Explosive + Posterior Chain + Active Recovery)",
+    Fri: "Friday Variable Day — options are Yoga, Pilates, Easy Zone 2 Run, Pool Swim, Kettlebells, N4x4 Run, or Rest"
+  };
+  const todayPlan = planMap[todayDay] || "Weekend active recovery";
 
   try {
     const res = await fetch("https://getreadiness-5iz3hgmcda-uc.a.run.app", {
