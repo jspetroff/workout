@@ -88,8 +88,8 @@ const FRI_OPTIONS = [
   {id:"fri-rest",   label:"Rest",         emoji:"🛋",note:"Good call. The week counts without Friday."},
 ];
 
-const DAYS = ["Mon","Tue","Wed","Thu","Fri"];
-const DAY_LABELS = {Mon:"Strength",Tue:"Yoga + Cold",Wed:"N4x4 or Swim",Thu:"Strength + Explosive",Fri:"Variable"};
+const DAYS = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+const DAY_LABELS = {Mon:"Strength",Tue:"Yoga + Cold",Wed:"N4x4 or Swim",Thu:"Strength + Explosive",Fri:"Variable",Sat:"Weekend",Sun:"Weekend"};
 
 const S = {
   sessions: {}, recovery: {},
@@ -210,8 +210,20 @@ function setSaveStatus(s) {
 
 window.setView = v => { S.view=v; renderAll(); };
 window.selectDay = d => { S.selectedDay=d; renderAll(); };
-window.setMonPlan = i => { S.monPlan=parseInt(i); renderDay(); };
-window.setThuPlan = i => { S.thuPlan=parseInt(i); renderDay(); };
+window.setMonPlan = i => {
+  S.monPlan=parseInt(i);
+  const k=sKey(S.weekOffset,S.selectedDay);
+  S.sessions[k]={...(S.sessions[k]||{}),monPlan:parseInt(i)};
+  scheduleSave();
+  renderDay();
+};
+window.setThuPlan = i => {
+  S.thuPlan=parseInt(i);
+  const k=sKey(S.weekOffset,S.selectedDay);
+  S.sessions[k]={...(S.sessions[k]||{}),thuPlan:parseInt(i)};
+  scheduleSave();
+  renderDay();
+};
 window.weekBack = () => { S.weekOffset--; renderAll(); };
 window.weekFwd = () => { if(S.weekOffset<0){S.weekOffset++;renderAll();} };
 window.setRecoveryDay = k => { S.recoveryActiveKey=k; renderRecovery(); };
@@ -321,7 +333,8 @@ function renderDay() {
   if(sData.restDay) { el.innerHTML=restHTML(sData); return; }
 
   if(d==="Mon") {
-    el.innerHTML = planBtnRow(MONDAY,S.monPlan,"setMonPlan") + workoutCardHTML(MONDAY[S.monPlan],sData) + restBtn();
+    const monIdx = sData.monPlan !== undefined ? sData.monPlan : S.monPlan;
+    el.innerHTML = planBtnRow(MONDAY,monIdx,"setMonPlan") + workoutCardHTML(MONDAY[monIdx],sData) + restBtn();
   } else if(d==="Tue") {
     const y=sData.yogaDone,p=sData.plungeDone;
     const feelOpts=["","💪 Strong flow","✅ Solid class","😐 Meh","🪫 Low energy"].map(o=>`<option value="${o}"${sData.feel===o?" selected":""}>${o||"Select..."}</option>`).join("");
@@ -370,8 +383,9 @@ function renderDay() {
       <textarea rows="2" placeholder="Intervals felt... ankle... Kevin's splits..." onchange="setSessionField('sessionNote',this.value)" style="width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#c8d4e8;font-size:13px;padding:7px 10px;box-sizing:border-box;resize:none;outline:none;">${esc(sData.sessionNote)}</textarea>
       ${restBtn()}`;
   } else if(d==="Thu") {
+    const thuIdx = sData.thuPlan !== undefined ? sData.thuPlan : S.thuPlan;
     const pre=sData.plungePreLift,skip=sData.plungeSkipped;
-    el.innerHTML = planBtnRow(THURSDAY,S.thuPlan,"setThuPlan") + workoutCardHTML(THURSDAY[S.thuPlan],sData) + `
+    el.innerHTML = planBtnRow(THURSDAY,thuIdx,"setThuPlan") + workoutCardHTML(THURSDAY[thuIdx],sData) + `
       <div style="margin-top:14px;background:#0d1520;border-radius:8px;padding:10px 12px;border:1px solid #1e3a2a;">
         <div style="color:#4ade80;font-size:12px;font-weight:700;margin-bottom:4px;">🧊 COLD PLUNGE</div>
         <div style="color:#6b7a90;font-size:13px;">Before lifting, or 4-6 hrs after. Not immediately post-strength.</div>
@@ -380,6 +394,21 @@ function renderDay() {
         <button onclick="toggleField('plungePreLift')" style="flex:1;padding:10px 0;border-radius:8px;border:${pre?"none":"1px solid #2a3545"};background:${pre?"#4ade80":"#1a2030"};color:${pre?"#0f1117":"#9bacc0"};font-weight:600;font-size:13px;cursor:pointer;">🧊 Plunged pre-lift</button>
         <button onclick="toggleField('plungeSkipped')" style="flex:1;padding:10px 0;border-radius:8px;border:${skip?"none":"1px solid #2a3545"};background:${skip?"#4ade80":"#1a2030"};color:${skip?"#0f1117":"#9bacc0"};font-weight:600;font-size:13px;cursor:pointer;">Skipped today</button>
       </div>
+      ${restBtn()}`;
+  } else if(d==="Sat" || d==="Sun") {
+    if(sData.restDay) { el.innerHTML=restHTML(sData); return; }
+    const actOpts = ["","🚴 Bike ride","🏊 Pool","🧘 Yoga","🌿 Gardening / yard work","🥾 Walk / hike","🎮 Low key day","🏃 Run","Other"].map(o=>`<option value="${o}"${sData.activity===o?" selected":""}>${o||"What did you do?"}</option>`).join("");
+    const feelOpts = ["","💪 Strong","✅ Good","😐 Meh","🪫 Tired","😴 Rest needed"].map(o=>`<option value="${o}"${sData.feel===o?" selected":""}>${o||"Select..."}</option>`).join("");
+    el.innerHTML=`
+      <div style="color:#c8d4e8;font-weight:600;margin-bottom:4px;">${d === "Sat" ? "Saturday" : "Sunday"} — Family Time</div>
+      <div style="color:#6b7a90;font-size:13px;margin-bottom:16px;">Log what you did and how you felt going into the week.</div>
+      <div style="color:#6b7a90;font-size:12px;margin-bottom:4px;">What did you do?</div>
+      <select onchange="setSessionField('activity',this.value)" style="width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:${sData.activity?"#e8edf5":"#6b7a90"};font-size:14px;padding:8px 10px;box-sizing:border-box;outline:none;margin-bottom:12px;">${actOpts}</select>
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <div style="flex:1;"><div style="color:#6b7a90;font-size:12px;margin-bottom:4px;">RPE (1-10)</div><input type="number" min="1" max="10" value="${esc(sData.rpe)}" onchange="setSessionField('rpe',this.value)" style="width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#e8edf5;font-size:15px;padding:7px 10px;box-sizing:border-box;outline:none;"></div>
+        <div style="flex:2;"><div style="color:#6b7a90;font-size:12px;margin-bottom:4px;">Feel</div><select onchange="setSessionField('feel',this.value)" style="width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:${sData.feel?"#e8edf5":"#6b7a90"};font-size:14px;padding:8px 10px;box-sizing:border-box;outline:none;">${feelOpts}</select></div>
+      </div>
+      <textarea rows="3" placeholder="Notes — what you did, how the family felt, anything worth remembering..." onchange="setSessionField('sessionNote',this.value)" style="width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#c8d4e8;font-size:13px;padding:7px 10px;box-sizing:border-box;resize:none;outline:none;">${esc(sData.sessionNote)}</textarea>
       ${restBtn()}`;
   } else if(d==="Fri") {
     const pick=sData.fridgePick;
@@ -433,7 +462,7 @@ function renderDayTabs() {
   const el=document.getElementById("day-tabs"); if(!el) return;
   el.innerHTML=DAYS.map(d=>{
     const s=getSess(S.weekOffset,d);
-    const has=!!(s.feel||s.rpe||s.yogaDone||s.fridgePick||s.restDay);
+    const has=!!(s.feel||s.rpe||s.yogaDone||s.fridgePick||s.restDay||s.activity||s.sessionNote);
     const act=S.selectedDay===d;
     return `<button onclick="selectDay('${d}')" style="flex-shrink:0;padding:8px 14px;border-radius:20px;border:${act?"none":"1px solid #2a3545"};background:${act?"#4ade80":"#141b26"};color:${act?"#0f1117":has?"#c8d4e8":"#6b7a90"};font-weight:700;font-size:14px;cursor:pointer;position:relative;">${d}${has&&!act?`<span style="position:absolute;top:4px;right:4px;width:5px;height:5px;border-radius:50%;background:#4ade80;"></span>`:""}</button>`;
   }).join("");
@@ -453,7 +482,7 @@ function renderLog() {
   const el=document.getElementById("log-content"); if(!el) return;
   const weeks=[-2,-1,0].map(off=>{
     const wk=getWeekKey(off);
-    const entries=DAYS.map(d=>({day:d,data:S.sessions[wk+"_"+d]||{}})).filter(({data})=>data.feel||data.rpe||data.sessionNote||data.restDay||data.yogaDone||data.fridgePick);
+    const entries=DAYS.map(d=>({day:d,data:S.sessions[wk+"_"+d]||{}})).filter(({data})=>data.feel||data.rpe||data.sessionNote||data.restDay||data.yogaDone||data.fridgePick||data.activity);
     return{weekStart:wk,entries};
   }).filter(w=>w.entries.length>0);
   if(!weeks.length){el.innerHTML=`<div style="text-align:center;color:#6b7a90;margin-top:60px;"><div style="font-size:32px;margin-bottom:12px;">📓</div><div>No sessions logged yet.</div></div>`;return;}
@@ -470,6 +499,7 @@ function renderLog() {
           ${!data.restDay&&data.rpe?`<div style="color:#6b7a90;font-size:13px;">RPE ${data.rpe}/10</div>`:""}
           ${data.sessionNote?`<div style="color:#9bacc0;font-size:13px;margin-top:4px;font-style:italic;">"${esc(data.sessionNote)}"</div>`:""}
           ${data.fridgePick?(()=>{const o=FRI_OPTIONS.find(f=>f.id===data.fridgePick);return o?`<div style="color:#4ade80;font-size:13px;margin-top:4px;">${o.emoji} ${o.label}</div>`:""})():""}
+          ${data.activity?`<div style="color:#4ade80;font-size:13px;margin-top:4px;">${data.activity}</div>`:""}
         </div>`).join("")}
     </div>`).join("");
 }
