@@ -24,6 +24,39 @@ const FIREBASE_CONFIG = {
   appId: "1:998100432483:web:eac515f401a44a5154ea56"
 };
 
+// ── Whoop ─────────────────────────────────────────────────────────────────────
+const WHOOP_CLIENT_ID = "6bc4d1ae-871f-4f86-b921-0ffe87181234";
+const WHOOP_REDIRECT = "https://workout.projectpetroff.com/whoop-callback.html";
+const WHOOP_HRV_URL = "https://whoophrv-998100432483.us-central1.run.app";
+
+function getWhoopToken() { return localStorage.getItem("whoop_access_token"); }
+function whoopConnected() { return !!getWhoopToken(); }
+
+function connectWhoop() {
+  const url = "https://api.prod.whoop.com/oauth/oauth2/auth?" + new URLSearchParams({
+    response_type: "code",
+    client_id: WHOOP_CLIENT_ID,
+    redirect_uri: WHOOP_REDIRECT,
+    scope: "read:recovery",
+    state: "workout-app"
+  });
+  window.location.href = url;
+}
+
+async function fetchWhoopHRV() {
+  const token = getWhoopToken();
+  if(!token) return null;
+  try {
+    const res = await fetch(WHOOP_HRV_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ accessToken: token })
+    });
+    const data = await res.json();
+    return data.hrv || null;
+  } catch(e) { return null; }
+}
+
 const MONDAY = [
   { id:"mon-a", label:"A", theme:"Squat + Vertical Pull + Ankle Rebuild", blocks:[
     {name:"Warmup",sets:null,notes:"Sun salutations / ankle CARs / glute activation"},
@@ -162,6 +195,7 @@ async function loadFromFirebase() {
       S.recovery = data.recovery||{};
       renderAll();
       showBanner("Data loaded", "saved");
+      autoFetchOnLoad();
     } else {
       showBanner("No saved data found", "saving");
     }
@@ -549,8 +583,12 @@ function renderRecovery() {
     <div style="display:flex;gap:4px;margin-bottom:14px;overflow-x:auto;">${dayPills}</div>
     <div style="background:#141b26;border-radius:10px;padding:14px;margin-bottom:16px;">
       <div style="color:#4ade80;font-size:12px;font-weight:700;letter-spacing:1px;margin-bottom:12px;">${dateLabel}</div>
-      <div style="margin-bottom:12px;"><div style="color:#6b7a90;font-size:12px;margin-bottom:4px;">HRV (from Whoop or Apple Watch)</div>
-        <input type="number" value="${esc(aData.hrv)}" placeholder="e.g. 68" onchange="setRecoveryHRV(this.value)"
+      <div style="margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+          <div style="color:#6b7a90;font-size:12px;">HRV</div>
+          ${whoopConnected() ? '<button onclick="autoFillHRV()" style="background:none;border:none;color:#4ade80;font-size:12px;cursor:pointer;">&#x21BB; Fetch from Whoop</button>' : '<button onclick="connectWhoop()" style="background:none;border:none;color:#6b7a90;font-size:12px;cursor:pointer;">Connect Whoop</button>'}
+        </div>
+        <input type="number" id="hrv-input" value="${esc(aData.hrv)}" placeholder="e.g. 68" onchange="setRecoveryHRV(this.value)"
           style="width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#e8edf5;font-size:22px;font-weight:700;padding:10px 12px;box-sizing:border-box;outline:none;text-align:center;"></div>
       <div><div style="color:#6b7a90;font-size:12px;margin-bottom:8px;">Life load</div><div style="display:flex;gap:8px;">${loadBtns}</div></div>
     </div>
@@ -606,6 +644,34 @@ function renderAll() {
   renderRecovery();
 }
 
+// ── Whoop auto-fill ──────────────────────────────────────────────────────────
+
+window.autoFillHRV = async function() {
+  const el = document.getElementById("hrv-input");
+  if(el) el.placeholder = "Fetching...";
+  const hrv = await fetchWhoopHRV();
+  if(hrv) {
+    setRecoveryHRV(hrv);
+    if(el) el.value = hrv;
+    renderRecovery();
+  } else {
+    if(el) el.placeholder = "Could not fetch — enter manually";
+  }
+};
+
+// On load, auto-fetch HRV if Whoop is connected and today has no HRV yet
+async function autoFetchOnLoad() {
+  if(!whoopConnected()) return;
+  const tk = todayKey();
+  if(S.recovery[tk]?.hrv) return; // already have today's HRV
+  const hrv = await fetchWhoopHRV();
+  if(hrv) {
+    S.recovery[tk] = {...(S.recovery[tk]||{}), hrv};
+    scheduleSave();
+    renderRecovery();
+  }
+}
+
 // ── Readiness Recommendation ─────────────────────────────────────────────────
 
 window.getReadiness = async function() {
@@ -656,7 +722,7 @@ window.getReadiness = async function() {
   console.log("HRV values for avg:", hrvValues, "avg:", hrvAvg);
 
   try {
-    const res = await fetch("https://getreadiness-5iz3hgmcda-uc.a.run.app", {
+    const res = await fetch("https://getreadiness-998100432483.us-central1.run.app", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ hrv, hrvAvg, load, recentSessions, todayPlan })
@@ -686,7 +752,7 @@ window.analyzeHRChart = async function(event) {
     const base64 = e.target.result.split(",")[1];
     const mediaType = file.type || "image/jpeg";
     try {
-      const res = await fetch("https://analyzehr-5iz3hgmcda-uc.a.run.app", {
+      const res = await fetch("https://analyzehr-998100432483.us-central1.run.app", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ imageBase64: base64, mediaType: mediaType })
