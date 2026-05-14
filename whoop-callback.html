@@ -6,10 +6,11 @@
 <title>Connecting Whoop...</title>
 <style>
   body { background: #0f1117; color: #e8edf5; font-family: Georgia, serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
-  .msg { text-align: center; }
+  .msg { text-align: center; max-width: 400px; padding: 20px; }
   .msg div:first-child { font-size: 32px; margin-bottom: 12px; }
   .msg p { color: #6b7a90; font-size: 15px; }
   .error { color: #f87171; }
+  pre { text-align: left; background: #141b26; padding: 12px; border-radius: 8px; font-size: 12px; color: #4ade80; word-break: break-all; white-space: pre-wrap; margin-top: 12px; }
 </style>
 </head>
 <body>
@@ -25,10 +26,17 @@ async function handleCallback() {
   const code = params.get("code");
   const error = params.get("error");
 
+  const debugInfo = "URL: " + window.location.href + "\n\nParams:\n" +
+    Array.from(params.entries()).map(([k,v]) => k + " = " + v).join("\n");
+
   if (error || !code) {
-    show("❌", "Authorization failed. Close this tab and try again.", true);
+    document.getElementById("msg").innerHTML =
+      '<div>❌</div><p class="error">Authorization failed: ' + (error || "no code") + '</p><pre>' + debugInfo + '</pre>';
     return;
   }
+
+  document.getElementById("msg").innerHTML =
+    '<div>⏳</div><p>Exchanging code for token...</p><pre>' + debugInfo + '</pre>';
 
   try {
     const res = await fetch(WHOOP_AUTH_URL, {
@@ -36,25 +44,21 @@ async function handleCallback() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ code })
     });
-
-    const data = await res.json();
-
+    const text = await res.text();
+    const data = JSON.parse(text);
     if (data.access_token) {
       localStorage.setItem("whoop_access_token", data.access_token);
       if (data.refresh_token) localStorage.setItem("whoop_refresh_token", data.refresh_token);
-      show("✅", "Whoop connected! Returning to app...");
-      setTimeout(() => { window.location.href = "/"; }, 1500);
+      document.getElementById("msg").innerHTML = '<div>✅</div><p>Connected! Returning to app...</p>';
+      setTimeout(() => { window.location.href = "/"; }, 2000);
     } else {
-      show("❌", "Could not get token: " + (data.error || "Unknown error"), true);
+      document.getElementById("msg").innerHTML =
+        '<div>❌</div><p class="error">Token error</p><pre>' + text + '</pre>';
     }
   } catch (err) {
-    show("❌", "Request failed: " + err.message, true);
+    document.getElementById("msg").innerHTML =
+      '<div>❌</div><p class="error">Request failed: ' + err.message + '</p>';
   }
-}
-
-function show(icon, text, isError) {
-  document.getElementById("msg").innerHTML =
-    `<div>${icon}</div><p class="${isError ? "error" : ""}">${text}</p>`;
 }
 
 handleCallback();
