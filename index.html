@@ -27,7 +27,7 @@ const FIREBASE_CONFIG = {
 // ── Whoop ─────────────────────────────────────────────────────────────────────
 const WHOOP_CLIENT_ID = "6bc4d1ae-871f-4f86-b921-0ffe87181234";
 const WHOOP_REDIRECT = "https://workout.projectpetroff.com/whoop-callback.html";
-const WHOOP_HRV_URL = "https://whoophrv-998100432483.us-central1.run.app";
+const WHOOP_HRV_URL = "https://whoophrv-5iz3hgmcda-uc.a.run.app";
 
 function getWhoopToken() { return localStorage.getItem("whoop_access_token"); }
 function whoopConnected() { return !!getWhoopToken(); }
@@ -459,7 +459,6 @@ function renderDay() {
     })();
 
     let sugg=[];
-    // Recovery-first logic: if HRV is down 3+ days or life load is heavy, nudge toward rest/easy
     if(hrvAlert || todayHRV?.load === "a lot") {
       sugg.push({id:"fri-rest",reason:"HRV has been trending down — your body is asking for it."});
       sugg.push({id:"fri-run-z2",reason:"If you move, keep it easy. Zone 2 only, no intensity."});
@@ -659,11 +658,10 @@ window.autoFillHRV = async function() {
   }
 };
 
-// On load, auto-fetch HRV if Whoop is connected and today has no HRV yet
 async function autoFetchOnLoad() {
   if(!whoopConnected()) return;
   const tk = todayKey();
-  if(S.recovery[tk]?.hrv) return; // already have today's HRV
+  if(S.recovery[tk]?.hrv) return;
   const hrv = await fetchWhoopHRV();
   if(hrv) {
     S.recovery[tk] = {...(S.recovery[tk]||{}), hrv};
@@ -683,12 +681,10 @@ window.getReadiness = async function() {
   const hrv = S.recovery[ak]?.hrv;
   const load = S.recovery[ak]?.load;
 
-  // Get last 5 sessions for context
   const recentSessions = [];
   for(let i = 0; i < 7; i++) {
     const d = new Date();
     d.setDate(d.getDate() - i);
-    const dateKey = d.toISOString().slice(0,10);
     const dayName = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.getDay()];
     const sess = S.sessions[getWeekKey(0) + "_" + dayName] || S.sessions[getWeekKey(-1) + "_" + dayName];
     if(sess && (sess.rpe || sess.feel)) {
@@ -696,7 +692,6 @@ window.getReadiness = async function() {
     }
   }
 
-  // Always recommend for today's actual day
   const todayDay = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][new Date().getDay()];
   const planMap = {
     Mon: "Monday Strength — choose Plan A (Squat + Vertical Pull + Ankle Rebuild), Plan B (Bulgarian Split Squat + Row + Balance), or Plan C (Squat Variation + Horizontal Pull + Glute Accessory)",
@@ -707,19 +702,9 @@ window.getReadiness = async function() {
   };
   const todayPlan = planMap[todayDay] || "Weekend active recovery";
 
-  // Calculate 7-day HRV average — check both local and UTC keys since data may have been saved under either
   const last7keys = last7();
-  const hrvValues = last7keys.map(k => {
-    // Try local date key first, then UTC fallback
-    const localVal = S.recovery[k]?.hrv;
-    if(localVal) return localVal;
-    // Also try UTC version of same date
-    const d = new Date(k + "T12:00:00");
-    const utcKey = d.toISOString().slice(0,10);
-    return S.recovery[utcKey]?.hrv;
-  }).filter(Boolean).map(Number);
+  const hrvValues = last7keys.map(k => S.recovery[k]?.hrv).filter(Boolean).map(Number);
   const hrvAvg = hrvValues.length ? Math.round(hrvValues.reduce((a,b)=>a+b,0)/hrvValues.length) : null;
-  console.log("HRV values for avg:", hrvValues, "avg:", hrvAvg);
 
   try {
     const res = await fetch("https://getreadiness-998100432483.us-central1.run.app", {
@@ -738,7 +723,7 @@ window.getReadiness = async function() {
   }
 };
 
-// ── HR Chart Analysis — calls Cloud Function (API key is secure server-side) ──
+// ── HR Chart Analysis ──────────────────────────────────────────────────────
 
 window.analyzeHRChart = async function(event) {
   const file = event.target.files[0];
