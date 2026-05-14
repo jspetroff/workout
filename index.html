@@ -37,7 +37,7 @@ function connectWhoop() {
     response_type: "code",
     client_id: WHOOP_CLIENT_ID,
     redirect_uri: WHOOP_REDIRECT,
-    scope: "read:recovery",
+    scope: "read:recovery read:cycles",
     state: "workout-app"
   });
   window.location.href = url;
