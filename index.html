@@ -165,7 +165,7 @@ function last7() {
 function lc(load) { return load==="normal"?"#4ade80":load==="heavy"?"#fbbf24":load==="a lot"?"#f87171":"#2a3545"; }
 function sKey(off,day) { return getWeekKey(off)+"_"+day; }
 function getSess(off,day) { return S.sessions[sKey(off,day)]||{}; }
-function esc(s) { return (String(s||"")).replace(/"/g,"&quot;").replace(/</g,"&lt;"); }
+function esc(s) { return (s||"").replace(/"/g,"&quot;").replace(/</g,"&lt;"); }
 
 let db = null;
 let DOC_REF = null;
