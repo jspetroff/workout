@@ -765,6 +765,15 @@ function renderAll() {
   if(!document.getElementById("app-shell")) {
     document.getElementById("app").innerHTML = `
       <div id="app-shell">
+        <div id="hrv-alert-banner" style="display:none;background:#2d1515;border-bottom:1px solid #f87171;padding:12px 18px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div style="color:#f87171;font-weight:700;font-size:14px;margin-bottom:2px;">⚠️ HRV down 3+ days in a row</div>
+              <div style="color:#9bacc0;font-size:13px;">Injury risk elevated. Dial back intensity today.</div>
+            </div>
+            <button onclick="dismissHRVAlert()" style="background:none;border:1px solid #f87171;border-radius:6px;color:#f87171;font-size:12px;padding:4px 10px;cursor:pointer;flex-shrink:0;margin-left:12px;">Got it</button>
+          </div>
+        </div>
         <div style="background:#0f1117;padding:16px 18px 0;position:sticky;top:0;z-index:10;border-bottom:1px solid #1e2530;">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
             <div><div style="font-size:18px;font-weight:700;">Training</div><div id="week-label" style="font-size:12px;color:#6b7a90;letter-spacing:1px;"></div></div>
@@ -797,7 +806,39 @@ function renderAll() {
   renderDay();
   renderLog();
   renderRecovery();
+  renderHRVAlert();
 }
+
+// ─── HRV Alert Banner ────────────────────────────────────────────────────────
+
+function getHRVStreak() {
+  const keys = last7();
+  const recent = keys.map(k => S.recovery[k]?.hrv).filter(Boolean).map(Number);
+  if (recent.length < 3) return 0;
+  let streak = 0;
+  for (let i = recent.length - 1; i > 0; i--) {
+    if (recent[i] < recent[i-1]) streak++;
+    else break;
+  }
+  return streak;
+}
+
+function renderHRVAlert() {
+  const banner = document.getElementById("hrv-alert-banner");
+  if (!banner) return;
+  const streak = getHRVStreak();
+  if (streak < 3) { banner.style.display = "none"; return; }
+  // Check if dismissed today
+  const dismissedOn = localStorage.getItem("hrv_alert_dismissed");
+  if (dismissedOn === todayKey()) { banner.style.display = "none"; return; }
+  banner.style.display = "block";
+}
+
+window.dismissHRVAlert = function() {
+  localStorage.setItem("hrv_alert_dismissed", todayKey());
+  const banner = document.getElementById("hrv-alert-banner");
+  if (banner) banner.style.display = "none";
+};
 
 // ─── Boot ────────────────────────────────────────────────────────────────────
 
