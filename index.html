@@ -29,10 +29,10 @@ const WHOOP_CLIENT_ID = "6bc4d1ae-871f-4f86-b921-0ffe87181234";
 const WHOOP_REDIRECT = "https://workout.projectpetroff.com/whoop-callback.html";
 const WHOOP_HRV_URL = "https://whoophrv-998100432483.us-central1.run.app";
 
-function getWhoopToken() { return localStorage.getItem("whoop_access_token"); }
-function whoopConnected() { return !!getWhoopToken(); }
+ getWhoopToken() { return localStorage.getItem("whoop_access_token"); }
+ whoopConnected() { return !!getWhoopToken(); }
 
-function connectWhoop() {
+ connectWhoop() {
   const url = "https://api.prod.whoop.com/oauth/oauth2/auth?" + new URLSearchParams({
     response_type: "code",
     client_id: WHOOP_CLIENT_ID,
@@ -43,7 +43,7 @@ function connectWhoop() {
   window.location.href = url;
 }
 
-async function fetchWhoopHRV() {
+async  fetchWhoopHRV() {
   const token = getWhoopToken();
   if(!token) return null;
   try {
@@ -135,7 +135,7 @@ const S = {
 
 let saveTimer = null;
 
-function getWeekKey(off) {
+ getWeekKey(off) {
   const now = new Date();
   const day = now.getDay();
   const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (day === 0 ? 6 : day - 1) + (off||0)*7);
@@ -144,7 +144,7 @@ function getWeekKey(off) {
   const dd = String(monday.getDate()).padStart(2,'0');
   return `${yyyy}-${mm}-${dd}`;
 }
-function fmtDate(iso) { return new Date(iso+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric"}); }
+ fmtDate(iso) { return new Date(iso+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric"}); }
 function todayKey() {
   const d = new Date();
   const yyyy = d.getFullYear();
@@ -165,7 +165,7 @@ function last7() {
 function lc(load) { return load==="normal"?"#4ade80":load==="heavy"?"#fbbf24":load==="a lot"?"#f87171":"#2a3545"; }
 function sKey(off,day) { return getWeekKey(off)+"_"+day; }
 function getSess(off,day) { return S.sessions[sKey(off,day)]||{}; }
-function esc(s) { return (s||"").replace(/"/g,"&quot;").replace(/</g,"&lt;"); }
+function esc(s) { return (String(s||"")).replace(/"/g,"&quot;").replace(/</g,"&lt;"); }
 
 let db = null;
 let DOC_REF = null;
