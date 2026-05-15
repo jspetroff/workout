@@ -647,11 +647,10 @@ function renderAll() {
 
 window.autoFillHRV = async function() {
   const el = document.getElementById("hrv-input");
-  if(el) el.placeholder = "Fetching...";
+  if(el) { el.value = ""; el.placeholder = "Fetching..."; }
   const hrv = await fetchWhoopHRV();
   if(hrv) {
     setRecoveryHRV(hrv);
-    if(el) el.value = hrv;
     renderRecovery();
   } else {
     if(el) el.placeholder = "Could not fetch — enter manually";
@@ -660,10 +659,9 @@ window.autoFillHRV = async function() {
 
 async function autoFetchOnLoad() {
   if(!whoopConnected()) return;
-  const tk = todayKey();
-  if(S.recovery[tk]?.hrv) return;
   const hrv = await fetchWhoopHRV();
   if(hrv) {
+    const tk = todayKey();
     S.recovery[tk] = {...(S.recovery[tk]||{}), hrv};
     scheduleSave();
     renderRecovery();
