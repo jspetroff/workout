@@ -657,7 +657,6 @@ window.autoFillHRV = async function() {
 async function autoFetchOnLoad() {
   if(!whoopConnected()) return;
   const tk = todayKey();
-  if(S.recovery[tk]?.hrv) return;
   const hrv = await fetchWhoopHRV();
   if(hrv) {
     S.recovery[tk] = {...(S.recovery[tk]||{}), hrv};
