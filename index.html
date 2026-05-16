@@ -165,7 +165,7 @@ const DAY_LABELS = {Mon:"Strength",Tue:"Yoga + Cold",Wed:"N4x4 or Swim",Thu:"Str
 const S = {
   sessions: {}, recovery: {},
   view: "today", weekOffset: 0,
-  selectedDay: ({1:"Mon",2:"Tue",3:"Wed",4:"Thu",5:"Fri"})[new Date().getDay()] || "Mon",
+  selectedDay: ({0:"Sun",1:"Mon",2:"Tue",3:"Wed",4:"Thu",5:"Fri",6:"Sat"})[new Date().getDay()],
   monPlan: 0, thuPlan: 0,
   saveStatus: "idle",
   recoveryActiveKey: (()=>{ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })(),
