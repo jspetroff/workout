@@ -255,6 +255,8 @@ async function initFirebase() {
   }
 }
 
+let dataLoaded = false;
+
 async function loadFromFirebase() {
   try {
     const snap = await window._fbGetDoc(DOC_REF);
@@ -262,13 +264,24 @@ async function loadFromFirebase() {
       const data = snap.data();
       S.sessions = data.sessions || {};
       S.recovery = data.recovery || {};
+      // Write to localStorage as backup
+      localStorage.setItem("pp_sessions_backup", JSON.stringify(S.sessions));
+      localStorage.setItem("pp_recovery_backup", JSON.stringify(S.recovery));
     }
+    dataLoaded = true;
     renderAll();
     showBanner("Data loaded", "saved");
     autoFetchOnLoad();
   } catch (e) {
-    showBanner("Load failed: " + e.message, "error");
+    // Firestore failed — try localStorage backup
+    const sessBackup = localStorage.getItem("pp_sessions_backup");
+    const recBackup = localStorage.getItem("pp_recovery_backup");
+    if (sessBackup) S.sessions = JSON.parse(sessBackup);
+    if (recBackup) S.recovery = JSON.parse(recBackup);
+    dataLoaded = true;
+    showBanner("Load failed — using local backup", "error");
     renderAll();
+    autoFetchOnLoad();
   }
 }
 
@@ -281,8 +294,12 @@ function showBanner(msg, type) {
 
 async function saveToFirebase() {
   if (!db || !DOC_REF) return;
+  if (!dataLoaded) return; // never save before data has loaded
   try {
     await window._fbSetDoc(DOC_REF, {sessions:S.sessions, recovery:S.recovery}, {merge:true});
+    // Keep localStorage in sync
+    localStorage.setItem("pp_sessions_backup", JSON.stringify(S.sessions));
+    localStorage.setItem("pp_recovery_backup", JSON.stringify(S.recovery));
     setSaveStatus("saved");
     setTimeout(() => setSaveStatus("idle"), 2000);
   } catch (e) {
