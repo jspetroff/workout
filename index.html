@@ -768,7 +768,7 @@ function renderAll() {
         <div id="hrv-alert-banner" style="display:none;background:#2d1515;border-bottom:1px solid #f87171;padding:12px 18px;">
           <div style="display:flex;justify-content:space-between;align-items:center;">
             <div>
-              <div style="color:#f87171;font-weight:700;font-size:14px;margin-bottom:2px;">⚠️ HRV down 3+ days in a row</div>
+              <div id="hrv-alert-heading" style="color:#f87171;font-weight:700;font-size:14px;margin-bottom:2px;">⚠️ HRV down 3+ days in a row</div>
               <div style="color:#9bacc0;font-size:13px;">Injury risk elevated. Dial back intensity today.</div>
             </div>
             <button onclick="dismissHRVAlert()" style="background:none;border:1px solid #f87171;border-radius:6px;color:#f87171;font-size:12px;padding:4px 10px;cursor:pointer;flex-shrink:0;margin-left:12px;">Got it</button>
@@ -828,9 +828,9 @@ function renderHRVAlert() {
   if (!banner) return;
   const streak = getHRVStreak();
   if (streak < 3) { banner.style.display = "none"; return; }
-  // Check if dismissed today
   const dismissedOn = localStorage.getItem("hrv_alert_dismissed");
   if (dismissedOn === todayKey()) { banner.style.display = "none"; return; }
+  banner.querySelector("#hrv-alert-heading").textContent = `⚠️ HRV down ${streak} days in a row`;
   banner.style.display = "block";
 }
 
