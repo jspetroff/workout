@@ -66,6 +66,17 @@ function whoopDisconnect() {
   renderRecovery();
 }
 
+window.disconnectWhoop = async function() {
+  if (!DOC_REF) return;
+  await window._fbSetDoc(DOC_REF, {
+    whoopAccessToken: null,
+    whoopRefreshToken: null,
+    whoopTokenExpired: false
+  }, { merge: true });
+  S.whoopConnected = false;
+  renderRecovery();
+};
+
 async function fetchWhoopHRV() {
   try {
     const res = await fetch(WHOOP_HRV_URL, {
@@ -763,7 +774,7 @@ function renderRecovery() {
       <div style="margin-bottom:12px;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
           <div style="color:#6b7a90;font-size:12px;">HRV</div>
-          ${whoopConnected()?'<button onclick="autoFillHRV()" style="background:none;border:none;color:#4ade80;font-size:12px;cursor:pointer;">&#x21BB; Fetch from Whoop</button>':'<button onclick="connectWhoop()" style="background:none;border:none;color:#6b7a90;font-size:12px;cursor:pointer;">Connect Whoop</button>'}
+          ${whoopConnected()?`<div style="display:flex;gap:8px;align-items:center;"><button onclick="autoFillHRV()" style="background:none;border:none;color:#4ade80;font-size:12px;cursor:pointer;">&#x21BB; Fetch from Whoop</button><button onclick="disconnectWhoop()" style="background:none;border:none;color:#3a4555;font-size:11px;cursor:pointer;">disconnect</button></div>`:'<button onclick="connectWhoop()" style="background:none;border:none;color:#6b7a90;font-size:12px;cursor:pointer;">Connect Whoop</button>'}
         </div>
         <input type="number" id="hrv-input" value="${esc(aData.hrv)}" placeholder="e.g. 68" onchange="setRecoveryHRV(this.value)"
           style="width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#e8edf5;font-size:22px;font-weight:700;padding:10px 12px;box-sizing:border-box;outline:none;text-align:center;"></div>
