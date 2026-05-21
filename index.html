@@ -47,7 +47,7 @@ const WHOOP_HRV_URL = "https://whoophrv-5iz3hgmcda-uc.a.run.app";
 
 function getWhoopToken() { return localStorage.getItem("whoop_access_token"); }
 function getWhoopRefreshToken() { return localStorage.getItem("whoop_refresh_token"); }
-function whoopConnected() { return !!getWhoopToken(); }
+function whoopConnected() { return !!S.whoopConnected; }
 
 function connectWhoop() {
   const url = "https://api.prod.whoop.com/oauth/oauth2/auth?" + new URLSearchParams({
@@ -67,26 +67,14 @@ function whoopDisconnect() {
 }
 
 async function fetchWhoopHRV() {
-  const token = getWhoopToken();
-  if (!token) return { hrv: null, expired: false };
   try {
     const res = await fetch(WHOOP_HRV_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        accessToken: token,
-        refreshToken: getWhoopRefreshToken()
-      })
+      body: JSON.stringify({})
     });
     const data = await res.json();
-    // Token refreshed server-side
-    if (data.newAccessToken) {
-      localStorage.setItem("whoop_access_token", data.newAccessToken);
-      if (data.newRefreshToken) localStorage.setItem("whoop_refresh_token", data.newRefreshToken);
-    }
-    // 401 means token expired and refresh failed — need to reconnect
-    if (res.status === 401 || (data.error && data.error.includes("401"))) {
-      whoopDisconnect();
+    if (res.status === 401) {
       return { hrv: null, expired: true };
     }
     return { hrv: data.hrv || null, expired: false };
@@ -168,6 +156,7 @@ const S = {
   selectedDay: ({0:"Sun",1:"Mon",2:"Tue",3:"Wed",4:"Thu",5:"Fri",6:"Sat"})[new Date().getDay()],
   monPlan: 0, thuPlan: 0,
   saveStatus: "idle",
+  whoopConnected: false,
   recoveryActiveKey: (()=>{ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })(),
 };
 
@@ -264,6 +253,7 @@ async function loadFromFirebase() {
       const data = snap.data();
       S.sessions = data.sessions || {};
       S.recovery = data.recovery || {};
+      S.whoopConnected = !!(data.whoopAccessToken && !data.whoopTokenExpired);
       // Write to localStorage as backup
       localStorage.setItem("pp_sessions_backup", JSON.stringify(S.sessions));
       localStorage.setItem("pp_recovery_backup", JSON.stringify(S.recovery));
