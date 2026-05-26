@@ -350,6 +350,7 @@ window.setSessionField = (field,val) => {
   const k=sKey(S.weekOffset,S.selectedDay);
   S.sessions[k]={...(S.sessions[k]||{}),[field]:val};
   scheduleSave(); renderDayTabs(); renderHeader();
+  if(field==="modality") renderDay();
 };
 window.toggleField = field => {
   const k=sKey(S.weekOffset,S.selectedDay);
