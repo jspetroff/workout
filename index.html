@@ -409,6 +409,7 @@ window.setSessionField = (field,val) => {
   const k=sKey(S.weekOffset,S.selectedDay);
   S.sessions[k]={...(S.sessions[k]||{}),[field]:val};
   scheduleSave(); renderDayTabs(); renderHeader();
+  if(field==="modality") renderDay();
 };
 window.toggleField = field => {
   const k=sKey(S.weekOffset,S.selectedDay);
@@ -765,13 +766,16 @@ function renderDay() {
       <textarea rows="2" placeholder="Note..." onchange="setSessionField('sessionNote',this.value)" style="width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#c8d4e8;font-size:13px;padding:7px 10px;box-sizing:border-box;resize:none;outline:none;">${esc(sData.sessionNote)}</textarea>
       ${restBtn()}`;
   } else if(d==="Wed") {
-    const isR=sData.modality==="run",isS=sData.modality==="swim";
+    const isR=sData.modality==="run",isS=sData.modality==="swim",isLong=sData.modality==="longrun",isPilates=sData.modality==="pilates",isKB=sData.modality==="kb";
     el.innerHTML=`
       <div style="color:#c8d4e8;font-weight:600;margin-bottom:4px;">N4x4 or Pool with Kevin</div>
       <div style="color:#6b7a90;font-size:13px;margin-bottom:14px;">Run: 4x4 min at 170-177 bpm, 3 min recovery below 130. Swim: 4x4 min hard, rest ~3 min.</div>
-      <div style="display:flex;gap:8px;margin-bottom:14px;">
-        <button onclick="setSessionField('modality','run')" style="flex:1;padding:10px 0;border-radius:8px;border:${isR?"none":"1px solid #2a3545"};background:${isR?"#4ade80":"#1a2030"};color:${isR?"#0f1117":"#9bacc0"};font-weight:600;font-size:14px;cursor:pointer;">🏃 N4x4 Run</button>
-        <button onclick="setSessionField('modality','swim')" style="flex:1;padding:10px 0;border-radius:8px;border:${isS?"none":"1px solid #2a3545"};background:${isS?"#4ade80":"#1a2030"};color:${isS?"#0f1117":"#9bacc0"};font-weight:600;font-size:14px;cursor:pointer;">🏊 Pool w/ Kevin</button>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
+        <button onclick="setSessionField('modality','run')" style="padding:8px 12px;border-radius:20px;border:${isR?"none":"1px solid #2a3545"};background:${isR?"#4ade80":"#1a2030"};color:${isR?"#0f1117":"#9bacc0"};font-weight:600;font-size:13px;cursor:pointer;">🏃 N4x4 Run</button>
+        <button onclick="setSessionField('modality','swim')" style="padding:8px 12px;border-radius:20px;border:${isS?"none":"1px solid #2a3545"};background:${isS?"#4ade80":"#1a2030"};color:${isS?"#0f1117":"#9bacc0"};font-weight:600;font-size:13px;cursor:pointer;">🏊 Pool w/ Kevin</button>
+        <button onclick="setSessionField('modality','longrun')" style="padding:8px 12px;border-radius:20px;border:${isLong?"none":"1px solid #2a3545"};background:${isLong?"#4ade80":"#1a2030"};color:${isLong?"#0f1117":"#9bacc0"};font-weight:600;font-size:13px;cursor:pointer;">🏃 Long Run</button>
+        <button onclick="setSessionField('modality','pilates')" style="padding:8px 12px;border-radius:20px;border:${isPilates?"none":"1px solid #2a3545"};background:${isPilates?"#4ade80":"#1a2030"};color:${isPilates?"#0f1117":"#9bacc0"};font-weight:600;font-size:13px;cursor:pointer;">⭕ Pilates</button>
+        <button onclick="setSessionField('modality','kb')" style="padding:8px 12px;border-radius:20px;border:${isKB?"none":"1px solid #2a3545"};background:${isKB?"#4ade80":"#1a2030"};color:${isKB?"#0f1117":"#9bacc0"};font-weight:600;font-size:13px;cursor:pointer;">🔔 Kettlebells</button>
       </div>
       ${sData.hrAnalysis ? `
       <div style="background:#141b26;border-radius:10px;padding:12px 14px;margin-bottom:10px;border:1px solid #1e3a2a;">
