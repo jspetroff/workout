@@ -178,6 +178,29 @@ const S = {
 
 let saveTimer = null;
 
+// Tracks which exercise names currently have their weight-history panel open.
+// Ephemeral UI state only — not saved, resets on page reload.
+const expandedHistory = new Set();
+
+window.toggleWeightHistory = name => {
+  if (expandedHistory.has(name)) expandedHistory.delete(name);
+  else expandedHistory.add(name);
+  renderDay();
+};
+
+function weightHistoryHTML(name) {
+  if (!expandedHistory.has(name)) return "";
+  const hist = getWeightHistory(name);
+  if (!hist.length) {
+    return `<div style="color:#6b7a90;font-size:12px;margin-top:6px;padding:8px 10px;background:#141b26;border-radius:6px;">No history yet for this one.</div>`;
+  }
+  const rows = hist.slice(-8).reverse().map(h => {
+    const label = h.date.toLocaleDateString("en-US",{month:"short",day:"numeric"});
+    return `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #1e2530;"><span style="color:#6b7a90;font-size:12px;">${label}</span><span style="color:#e8edf5;font-size:12px;font-weight:600;">${esc(h.value)}</span></div>`;
+  }).join("");
+  return `<div style="margin-top:6px;padding:8px 10px;background:#141b26;border-radius:6px;">${rows}</div>`;
+}
+
 function getWeekKey(off) {
   const now = new Date();
   const day = now.getDay();
@@ -216,17 +239,43 @@ function hasSessionContent(data) {
   return false;
 }
 
+// Converts a session key like "2026-07-13_Wed" into an actual Date object.
+// Needed because DAYS is in weekday order, not alphabetical order — sorting
+// session keys as plain strings scrambles same-week days (Fri < Mon < Sat <
+// Sun < Thu < Tue < Wed alphabetically), which is not chronological order.
+function sessionKeyToDate(key) {
+  const parts = key.split("_");
+  if (parts.length !== 2) return null;
+  const [weekIso, dayName] = parts;
+  const dayIdx = DAYS.indexOf(dayName);
+  if (dayIdx < 0) return null;
+  const d = new Date(weekIso + "T12:00:00");
+  if (isNaN(d)) return null;
+  d.setDate(d.getDate() + dayIdx);
+  return d;
+}
+
 // Looks up the most recent weight logged for a given exercise name, searching
 // across ALL sessions (any day, any week) — the same movement can show up on
-// different days. String-sorted by session key: approximate recency, good
-// enough for a placeholder hint, not a precision analytics feature.
+// different days. Sorted by real resolved date, not by string comparison.
 function getLastWeight(name, excludeKey) {
-  const keys = Object.keys(S.sessions)
+  const entries = Object.keys(S.sessions)
     .filter(k => k !== excludeKey && S.sessions[k]?.weights?.[name])
-    .sort()
-    .reverse();
-  if (!keys.length) return null;
-  return { value: S.sessions[keys[0]].weights[name], key: keys[0] };
+    .map(k => ({ key:k, date: sessionKeyToDate(k), value: S.sessions[k].weights[name] }))
+    .filter(e => e.date)
+    .sort((a,b) => b.date - a.date);
+  if (!entries.length) return null;
+  return { value: entries[0].value, key: entries[0].key };
+}
+
+// Full chronological weight history for a given exercise name, oldest first —
+// powers the expandable progression view under each weight input.
+function getWeightHistory(name) {
+  return Object.keys(S.sessions)
+    .filter(k => S.sessions[k]?.weights?.[name])
+    .map(k => ({ date: sessionKeyToDate(k), value: S.sessions[k].weights[name] }))
+    .filter(e => e.date)
+    .sort((a,b) => a.date - b.date);
 }
 
 // Recovery-based plan suggestion for Mon/Thu. Poor recovery -> suggest the
@@ -662,7 +711,9 @@ function workoutCardHTML(workout, sData) {
             style="flex:1;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#e8edf5;font-size:13px;padding:5px 8px;box-sizing:border-box;outline:none;">` : ""}
           <input type="text" value="${esc(notes[i])}" placeholder="Notes..." onchange="setExerciseNote(${i},this.value)"
             style="flex:2;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#c8d4e8;font-size:13px;padding:5px 8px;box-sizing:border-box;outline:none;">
+          ${ex.sets ? `<button onclick="toggleWeightHistory('${safeName}')" title="Weight history" style="flex-shrink:0;background:none;border:1px solid #2a3545;border-radius:6px;color:#6b7a90;font-size:14px;padding:0 8px;cursor:pointer;">📈</button>` : ""}
         </div>
+        ${ex.sets ? weightHistoryHTML(ex.name) : ""}
       </div>
     </div>`;
   }).join("");
@@ -707,7 +758,9 @@ function customExercisesHTML(sData) {
             style="flex:1;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#e8edf5;font-size:13px;padding:5px 8px;box-sizing:border-box;outline:none;">
           <input type="text" value="${esc(ex.note)}" placeholder="Notes..." onchange="setCustomExerciseNote('${ex.id}',this.value)"
             style="flex:2;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#c8d4e8;font-size:13px;padding:5px 8px;box-sizing:border-box;outline:none;">
+          <button onclick="toggleWeightHistory('${safeName}')" title="Weight history" style="flex-shrink:0;background:none;border:1px solid #2a3545;border-radius:6px;color:#6b7a90;font-size:14px;padding:0 8px;cursor:pointer;">📈</button>
         </div>
+        ${weightHistoryHTML(ex.name)}
       </div>
       <button onclick="removeCustomExercise('${ex.id}')" style="color:#3a4555;background:none;border:none;font-size:16px;cursor:pointer;padding:0 4px;">&times;</button>
     </div>`;
