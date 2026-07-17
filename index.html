@@ -580,7 +580,6 @@ window.pullQueueItem = id => {
   const list = [...(cur.customExercises||[])];
   list.push({ id: Date.now()+"", name: item.label, sets:"", checked:false, note:"", videoUrl: item.url });
   S.sessions[k] = { ...cur, customExercises: list };
-  S.videoQueue = S.videoQueue.filter(q => q.id !== id);
   scheduleSave(); renderDay();
 };
 
@@ -776,18 +775,7 @@ function customExercisesHTML(sData) {
     </div>`;
 }
 
-function queueTeaserHTML() {
-  const items = S.videoQueue || [];
-  if (!items.length) return "";
-  const item = items[0];
-  return `<div style="background:#0d1520;border-radius:8px;padding:10px 12px;border:1px solid #1e3a2a;margin-top:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;">
-    <div style="min-width:0;">
-      <div style="color:#4ade80;font-size:11px;font-weight:700;letter-spacing:1px;margin-bottom:2px;">🎥 FROM YOUR QUEUE</div>
-      <div style="color:#c8d4e8;font-size:13px;">${esc(item.label)}</div>
-    </div>
-    <button onclick="pullQueueItem('${item.id}')" style="flex-shrink:0;padding:7px 12px;border-radius:6px;border:none;background:#4ade80;color:#0f1117;font-weight:700;font-size:12px;cursor:pointer;">Add to today</button>
-  </div>`;
-}
+
 
 function restHTML(sData) {
   return `<div style="background:#141b26;border-radius:10px;padding:20px 16px;text-align:center;">
@@ -818,7 +806,7 @@ function renderDay() {
     const monIdx = sData.monPlan !== undefined ? sData.monPlan : S.monPlan;
     const monSugg = getStrengthSuggestion("Mon", MONDAY, "monPlan");
     const monSuggHTML = monSugg ? `<div style="background:#0d1520;border-radius:8px;padding:10px 12px;border:1px solid #1e3a2a;margin-bottom:10px;"><div style="color:#4ade80;font-size:12px;font-weight:700;margin-bottom:4px;">SUGGESTED</div><div style="color:#9bacc0;font-size:13px;">${monSugg.reason}</div></div>` : "";
-    el.innerHTML = monSuggHTML + planBtnRow(MONDAY,monIdx,"setMonPlan") + workoutCardHTML(MONDAY[monIdx],sData) + customExercisesHTML(sData) + queueTeaserHTML() + restBtn();
+    el.innerHTML = monSuggHTML + planBtnRow(MONDAY,monIdx,"setMonPlan") + workoutCardHTML(MONDAY[monIdx],sData) + customExercisesHTML(sData) + restBtn();
   } else if(d==="Tue") {
     const y=sData.yogaDone,p=sData.plungeDone;
     const feelOpts=["","💪 Strong flow","✅ Solid class","😐 Meh","🪫 Low energy"].map(o=>`<option value="${o}"${sData.feel===o?" selected":""}>${o||"Select..."}</option>`).join("");
@@ -874,7 +862,7 @@ function renderDay() {
     const pre=sData.plungePreLift,skip=sData.plungeSkipped;
     const thuSugg = getStrengthSuggestion("Thu", THURSDAY, "thuPlan");
     const thuSuggHTML = thuSugg ? `<div style="background:#0d1520;border-radius:8px;padding:10px 12px;border:1px solid #1e3a2a;margin-bottom:10px;"><div style="color:#4ade80;font-size:12px;font-weight:700;margin-bottom:4px;">SUGGESTED</div><div style="color:#9bacc0;font-size:13px;">${thuSugg.reason}</div></div>` : "";
-    el.innerHTML = thuSuggHTML + planBtnRow(THURSDAY,thuIdx,"setThuPlan") + workoutCardHTML(THURSDAY[thuIdx],sData) + customExercisesHTML(sData) + queueTeaserHTML() + `
+    el.innerHTML = thuSuggHTML + planBtnRow(THURSDAY,thuIdx,"setThuPlan") + workoutCardHTML(THURSDAY[thuIdx],sData) + customExercisesHTML(sData) + `
       <div style="margin-top:14px;background:#0d1520;border-radius:8px;padding:10px 12px;border:1px solid #1e3a2a;">
         <div style="color:#4ade80;font-size:12px;font-weight:700;margin-bottom:4px;">🧊 COLD PLUNGE</div>
         <div style="color:#6b7a90;font-size:13px;">Before lifting, or 4-6 hrs after. Not immediately post-strength.</div>
