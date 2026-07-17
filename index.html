@@ -93,58 +93,62 @@ async function fetchWhoopHRV() {
 }
 
 // ─── Workout Data ────────────────────────────────────────────────────────────
+// Focus: Squat/Hinge + Glute + Posterior Chain + Upper Pull + Upper Press.
+// Ankle work is no longer a dedicated block — it rides along incidentally
+// in the single-leg / split-stance movements instead.
+// `intensity` drives the recovery-based plan suggestion below.
 
 const MONDAY = [
-  { id:"mon-a", label:"A", theme:"Squat + Vertical Pull + Ankle Rebuild", blocks:[
-    {name:"Warmup",sets:null,notes:"Sun salutations / ankle CARs / glute activation"},
-    {name:"Goblet Squat (tempo 3-1-1)",sets:"3x8",notes:"Slow eccentric. Full depth as ankle allows."},
+  { id:"mon-a", label:"A", theme:"Squat + Press + Pull + Glute", intensity:"moderate", blocks:[
+    {name:"Warmup",sets:null,notes:"Sun salutations / hip 90-90 / glute activation"},
+    {name:"Goblet Squat (tempo 3-1-1)",sets:"3x8",notes:"Slow eccentric. Full depth."},
+    {name:"DB Bench Press or Incline Press",sets:"4x8",notes:"Full ROM. Control the eccentric."},
     {name:"Pull-Up or Lat Pulldown",sets:"4x6-8",notes:"Dead hang. Scapular control."},
-    {name:"Single-Leg RDL (light)",sets:"3x8 each",notes:"Use ankle as guide. Glute squeeze at top."},
-    {name:"Half-Kneeling Pallof Press",sets:"3x10 each",notes:"Proprioception + anti-rotation. Switch lead leg."},
-    {name:"Ankle Alphabet / Balance Work",sets:"2x60s each",notes:"Single-leg stance on foam pad."},
+    {name:"Single-Leg RDL",sets:"3x8 each",notes:"Glute squeeze at top. Balance carries incidentally here."},
+    {name:"Cable Pull-Through or Banded Glute Bridge",sets:"3x12",notes:"Glute isolation finisher. Squeeze, don't rush."},
   ]},
-  { id:"mon-b", label:"B", theme:"Bulgarian Split Squat + Row + Balance", blocks:[
-    {name:"Warmup",sets:null,notes:"Sun salutations / hip 90-90 / ankle mobility"},
+  { id:"mon-b", label:"B", theme:"Bulgarian Split Squat + Row + Press + Glute", intensity:"high", blocks:[
+    {name:"Warmup",sets:null,notes:"Sun salutations / hip 90-90 mobility"},
     {name:"Bulgarian Split Squat",sets:"4x6 each",notes:"Rear foot elevated. Glute squeeze at top."},
     {name:"Chest-Supported DB Row",sets:"4x10",notes:"Elbows back, squeeze at top. No momentum."},
+    {name:"Push-Up or Incline DB Press",sets:"3x10-12",notes:"Full lockout. Add load or elevate feet as it gets easy."},
     {name:"Hip Thrust",sets:"3x12",notes:"Barbell or band. Primary glute driver."},
-    {name:"Single-Leg Balance to Reach",sets:"3x8 each direction",notes:"Star excursion. Ankle rehab + proprioception."},
     {name:"Farmer Carry",sets:"3x40 yds",notes:"Heavy. Core stiffness, posture."},
   ]},
-  { id:"mon-c", label:"C", theme:"Squat Variation + Horizontal Pull + Glute Accessory", blocks:[
-    {name:"Warmup",sets:null,notes:"Sun salutations / ankle CARs / lateral band walks"},
+  { id:"mon-c", label:"C", theme:"Squat Variation + Pull + Press + Glute", intensity:"high", blocks:[
+    {name:"Warmup",sets:null,notes:"Sun salutations / lateral band walks"},
     {name:"Front Squat or Safety Bar Squat",sets:"4x5",notes:"Upright torso. Go as deep as comfortable."},
     {name:"Inverted Row or Cable Row",sets:"4x10",notes:"Full protraction to retraction. Keep hips stiff."},
+    {name:"Overhead Press or Dip",sets:"3x8",notes:"Strict form. Build the press base."},
     {name:"Sumo RDL",sets:"3x10",notes:"Wide stance. Control the eccentric."},
-    {name:"Side-Lying Hip Abduction + Clamshell",sets:"2x15 each",notes:"Banded. Glute med upstream of ankle."},
-    {name:"Single-Leg Calf Raise",sets:"3x15 each",notes:"Slow. Ankle strengthening."},
+    {name:"Side-Lying Hip Abduction + Clamshell",sets:"2x15 each",notes:"Banded. Glute med, keeps hips stable under load."},
   ]},
 ];
 
 const THURSDAY = [
-  { id:"thu-a", label:"A", theme:"Hinge Heavy + Explosive Finish", blocks:[
-    {name:"Warmup",sets:null,notes:"Hip 90-90 / cat-cow / glute activation / ankle prep"},
+  { id:"thu-a", label:"A", theme:"Hinge Heavy + Explosive + Press + Pull", intensity:"high", blocks:[
+    {name:"Warmup",sets:null,notes:"Hip 90-90 / cat-cow / glute activation"},
     {name:"Trap Bar Deadlift",sets:"4x5",notes:"Go heavy. Neutral spine, push the floor away."},
-    {name:"Box Jump (bilateral)",sets:"4x4",notes:"Step down, don't jump down. Pain as guide on landing."},
-    {name:"Kettlebell Swing",sets:"3x15",notes:"Hinge, not squat. Explosive hip snap."},
-    {name:"Copenhagen Plank",sets:"3x20s each",notes:"Adductor + hip stability. Ankle stays neutral."},
-    {name:"Recovery: 10 min easy walk or bike",sets:null,notes:"Flush legs before cold plunge if doing today."},
+    {name:"Box Jump (bilateral)",sets:"4x4",notes:"Step down, don't jump down."},
+    {name:"Weighted Pull-Up or Heavy Row",sets:"4x6-8",notes:"Add load if bodyweight is easy."},
+    {name:"DB Bench or Push Press",sets:"3x8",notes:"Pick one — alternate week to week."},
+    {name:"Back Extension or Nordic Curl",sets:"3x10",notes:"Posterior chain finisher. Control the eccentric."},
   ]},
-  { id:"thu-b", label:"B", theme:"Power Day: Jumps + RDL", blocks:[
-    {name:"Warmup",sets:null,notes:"Dynamic hip openers / jump rope easy 3 min / ankle prep"},
+  { id:"thu-b", label:"B", theme:"Power Day: Jumps + RDL + Press + Pull", intensity:"moderate", blocks:[
+    {name:"Warmup",sets:null,notes:"Dynamic hip openers / jump rope easy 3 min"},
     {name:"Broad Jump",sets:"5x3",notes:"Max intent. Bilateral. Absorb through hips."},
     {name:"Romanian Deadlift",sets:"4x8",notes:"Full hamstring stretch. Slow eccentric (3 sec down)."},
-    {name:"Lateral Bound + Stick (bilateral)",sets:"3x5 each",notes:"Lateral explosive. Land both feet."},
-    {name:"Suitcase Carry",sets:"3x30 yds each",notes:"Offset load. Anti-lateral flexion."},
+    {name:"Weighted Row or Pull-Up",sets:"4x8",notes:"Squeeze at top, control the negative."},
+    {name:"Overhead Press or DB Bench",sets:"3x8",notes:"Alternate with Thu-A's press pick for variety."},
     {name:"Dead Bug",sets:"3x8 each",notes:"Core control. Slow and deliberate."},
   ]},
-  { id:"thu-c", label:"C", theme:"Explosive + Posterior Chain + Active Recovery", blocks:[
-    {name:"Warmup",sets:null,notes:"Sun salutations / hip flexor stretch / calf/ankle mobility"},
+  { id:"thu-c", label:"C", theme:"Explosive + Posterior Chain + Press + Pull", intensity:"high", blocks:[
+    {name:"Warmup",sets:null,notes:"Sun salutations / hip flexor stretch"},
     {name:"Hang Power Clean or DB Jump Squat",sets:"4x4",notes:"Clean mechanics first. Otherwise DB jump squat."},
-    {name:"Single-Leg RDL (loaded)",sets:"3x8 each",notes:"Building on Monday. Go heavier if ankle allows."},
-    {name:"Step-Up + Drive Knee",sets:"3x8 each",notes:"Box at knee height. Glute loading. Ankle rehab."},
-    {name:"Plank Variations",sets:"3x30s",notes:"Rotate: standard / RKC / side / reach-through. Pick 2."},
-    {name:"10-15 min easy yoga or stretch",sets:null,notes:"Active recovery to close. Don't skip this."},
+    {name:"Single-Leg RDL (loaded)",sets:"3x8 each",notes:"Heaviest of the three RDL variants this week. Balance carries incidentally."},
+    {name:"Weighted Pull-Up or Heavy Row",sets:"4x6-8",notes:"Build on Thu-A/B progression."},
+    {name:"Push Press or Incline DB Press",sets:"3x8",notes:"Third press variant of the week — rotate through all three."},
+    {name:"Back Extension or Plank Variations",sets:"3x10-12",notes:"Posterior chain or core, pick based on what's sore."},
   ]},
 ];
 
@@ -168,6 +172,7 @@ const S = {
   monPlan: 0, thuPlan: 0,
   saveStatus: "idle",
   whoopConnected: false,
+  videoQueue: [],
   recoveryActiveKey: (()=>{ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })(),
 };
 
@@ -195,6 +200,60 @@ function lc(load) { return load==="normal"?"#4ade80":load==="heavy"?"#fbbf24":lo
 function sKey(off,day) { return getWeekKey(off)+"_"+day; }
 function getSess(off,day) { return S.sessions[sKey(off,day)]||{}; }
 function esc(s) { return (""+( s||"")).replace(/"/g,"&quot;").replace(/</g,"&lt;"); }
+
+// Looks up the most recent weight logged for a given exercise name, searching
+// across ALL sessions (any day, any week) — the same movement can show up on
+// different days. String-sorted by session key: approximate recency, good
+// enough for a placeholder hint, not a precision analytics feature.
+function getLastWeight(name, excludeKey) {
+  const keys = Object.keys(S.sessions)
+    .filter(k => k !== excludeKey && S.sessions[k]?.weights?.[name])
+    .sort()
+    .reverse();
+  if (!keys.length) return null;
+  return { value: S.sessions[keys[0]].weights[name], key: keys[0] };
+}
+
+// Recovery-based plan suggestion for Mon/Thu. Poor recovery -> suggest the
+// moderate-intensity variant. Otherwise -> suggest a high-intensity variant,
+// preferring one that's not simply a repeat of last week's exact plan.
+function getStrengthSuggestion(dayName, plans, planField) {
+  const ak = todayKey();
+  const todayRec = S.recovery[ak] || {};
+  const streak = getHRVStreak();
+  const poorRecovery = streak >= 3 || todayRec.load === "a lot";
+  const heavyLoad = todayRec.load === "heavy";
+
+  const lastWeekSess = getSess(S.weekOffset - 1, dayName);
+  const lastPlanIdx = lastWeekSess[planField];
+  const lastPlan = lastPlanIdx !== undefined ? plans[lastPlanIdx] : null;
+
+  if (poorRecovery) {
+    const idx = plans.findIndex(p => p.intensity === "moderate");
+    if (idx < 0) return null;
+    return {
+      idx,
+      reason: streak >= 3
+        ? `HRV down ${streak} days in a row — back off to Plan ${plans[idx].label} today.`
+        : "A lot going on — Plan " + plans[idx].label + " keeps you moving without piling on."
+    };
+  }
+  if (heavyLoad) {
+    const idx = plans.findIndex(p => p.intensity === "moderate");
+    if (idx < 0) return null;
+    return { idx, reason: "Life load is heavy — Plan " + plans[idx].label + " today." };
+  }
+  const highIdxs = plans.map((p,i)=>({p,i})).filter(x=>x.p.intensity==="high").map(x=>x.i);
+  if (!highIdxs.length) return null;
+  let idx = highIdxs.find(i => i !== lastPlanIdx);
+  if (idx === undefined) idx = highIdxs[0];
+  return {
+    idx,
+    reason: lastPlan
+      ? `Recovered well — Plan ${plans[idx].label} hasn't come up as recently as Plan ${lastPlan.label}.`
+      : "Recovered well — go heavy with Plan " + plans[idx].label + "."
+  };
+}
 
 // ─── Firebase ────────────────────────────────────────────────────────────────
 
@@ -230,13 +289,11 @@ async function initFirebase() {
       onAuthStateChanged(auth, (user) => {
         currentUser = user;
         if (user) {
-          // Correct user
           if (user.email === "jspetroff@gmail.com") {
             document.getElementById("auth-screen").style.display = "none";
             document.getElementById("app").style.display = "block";
             loadFromFirebase();
           } else {
-            // Wrong account
             document.getElementById("auth-screen").style.display = "flex";
             document.getElementById("app").style.display = "none";
             document.getElementById("auth-error").textContent = "Wrong account. Sign in with jspetroff@gmail.com.";
@@ -264,21 +321,23 @@ async function loadFromFirebase() {
       const data = snap.data();
       S.sessions = data.sessions || {};
       S.recovery = data.recovery || {};
+      S.videoQueue = data.videoQueue || [];
       S.whoopConnected = !!(data.whoopAccessToken && !data.whoopTokenExpired);
-      // Write to localStorage as backup
       localStorage.setItem("pp_sessions_backup", JSON.stringify(S.sessions));
       localStorage.setItem("pp_recovery_backup", JSON.stringify(S.recovery));
+      localStorage.setItem("pp_queue_backup", JSON.stringify(S.videoQueue));
     }
     dataLoaded = true;
     renderAll();
     showBanner("Data loaded", "saved");
     autoFetchOnLoad();
   } catch (e) {
-    // Firestore failed — try localStorage backup
     const sessBackup = localStorage.getItem("pp_sessions_backup");
     const recBackup = localStorage.getItem("pp_recovery_backup");
+    const queueBackup = localStorage.getItem("pp_queue_backup");
     if (sessBackup) S.sessions = JSON.parse(sessBackup);
     if (recBackup) S.recovery = JSON.parse(recBackup);
+    if (queueBackup) S.videoQueue = JSON.parse(queueBackup);
     dataLoaded = true;
     showBanner("Load failed — using local backup", "error");
     renderAll();
@@ -295,12 +354,12 @@ function showBanner(msg, type) {
 
 async function saveToFirebase() {
   if (!db || !DOC_REF) return;
-  if (!dataLoaded) return; // never save before data has loaded
+  if (!dataLoaded) return;
   try {
-    await window._fbSetDoc(DOC_REF, {sessions:S.sessions, recovery:S.recovery}, {merge:true});
-    // Keep localStorage in sync
+    await window._fbSetDoc(DOC_REF, {sessions:S.sessions, recovery:S.recovery, videoQueue:S.videoQueue}, {merge:true});
     localStorage.setItem("pp_sessions_backup", JSON.stringify(S.sessions));
     localStorage.setItem("pp_recovery_backup", JSON.stringify(S.recovery));
+    localStorage.setItem("pp_queue_backup", JSON.stringify(S.videoQueue));
     setSaveStatus("saved");
     setTimeout(() => setSaveStatus("idle"), 2000);
   } catch (e) {
@@ -350,7 +409,6 @@ window.setSessionField = (field,val) => {
   const k=sKey(S.weekOffset,S.selectedDay);
   S.sessions[k]={...(S.sessions[k]||{}),[field]:val};
   scheduleSave(); renderDayTabs(); renderHeader();
-  if(field==="modality") renderDay();
 };
 window.toggleField = field => {
   const k=sKey(S.weekOffset,S.selectedDay);
@@ -377,6 +435,12 @@ window.setExerciseNote = (i,val) => {
   S.sessions[k]={...cur,notes:{...(cur.notes||{}),[i]:val}};
   scheduleSave();
 };
+window.setExerciseWeight = (name, val) => {
+  const k=sKey(S.weekOffset,S.selectedDay);
+  const cur=S.sessions[k]||{};
+  S.sessions[k]={...cur,weights:{...(cur.weights||{}),[name]:val}};
+  scheduleSave();
+};
 window.setRecoveryHRV = val => {
   const ak=S.recoveryActiveKey;
   S.recovery[ak]={...(S.recovery[ak]||{}),hrv:val};
@@ -388,12 +452,79 @@ window.setRecoveryLoad = val => {
   scheduleSave(); renderRecovery();
 };
 
+// ─── Custom Exercises (session-only ad hoc adds) ─────────────────────────────
+
+window.addCustomExercise = () => {
+  const nameEl = document.getElementById("custom-ex-name");
+  const setsEl = document.getElementById("custom-ex-sets");
+  const name = (nameEl?.value || "").trim();
+  if (!name) return;
+  const k = sKey(S.weekOffset, S.selectedDay);
+  const cur = S.sessions[k] || {};
+  const list = [...(cur.customExercises || [])];
+  list.push({ id: Date.now()+"", name, sets: (setsEl?.value||"").trim(), checked:false, note:"" });
+  S.sessions[k] = { ...cur, customExercises: list };
+  if (nameEl) nameEl.value = "";
+  if (setsEl) setsEl.value = "";
+  scheduleSave(); renderDay();
+};
+window.toggleCustomExercise = id => {
+  const k = sKey(S.weekOffset, S.selectedDay);
+  const cur = S.sessions[k] || {};
+  const list = (cur.customExercises||[]).map(ex => ex.id===id?{...ex,checked:!ex.checked}:ex);
+  S.sessions[k] = { ...cur, customExercises: list };
+  scheduleSave(); renderDay();
+};
+window.setCustomExerciseNote = (id,val) => {
+  const k = sKey(S.weekOffset, S.selectedDay);
+  const cur = S.sessions[k] || {};
+  const list = (cur.customExercises||[]).map(ex => ex.id===id?{...ex,note:val}:ex);
+  S.sessions[k] = { ...cur, customExercises: list };
+  scheduleSave();
+};
+window.removeCustomExercise = id => {
+  const k = sKey(S.weekOffset, S.selectedDay);
+  const cur = S.sessions[k] || {};
+  const list = (cur.customExercises||[]).filter(ex => ex.id!==id);
+  S.sessions[k] = { ...cur, customExercises: list };
+  scheduleSave(); renderDay();
+};
+
+// ─── Video Queue (Instagram/saved-workout links) ─────────────────────────────
+
+window.addQueueItem = () => {
+  const urlEl = document.getElementById("queue-url");
+  const labelEl = document.getElementById("queue-label");
+  const url = (urlEl?.value||"").trim();
+  const label = (labelEl?.value||"").trim();
+  if (!url) return;
+  S.videoQueue = [...S.videoQueue, { id: Date.now()+"", url, label: label || "Saved workout", addedAt: Date.now() }];
+  if (urlEl) urlEl.value = "";
+  if (labelEl) labelEl.value = "";
+  scheduleSave(); renderQueue();
+};
+window.removeQueueItem = id => {
+  S.videoQueue = S.videoQueue.filter(item => item.id !== id);
+  scheduleSave(); renderQueue(); renderDay();
+};
+window.pullQueueItem = id => {
+  const item = S.videoQueue.find(q => q.id === id);
+  if (!item) return;
+  const k = sKey(S.weekOffset, S.selectedDay);
+  const cur = S.sessions[k] || {};
+  const list = [...(cur.customExercises||[])];
+  list.push({ id: Date.now()+"", name: item.label, sets:"", checked:false, note:"", videoUrl: item.url });
+  S.sessions[k] = { ...cur, customExercises: list };
+  S.videoQueue = S.videoQueue.filter(q => q.id !== id);
+  scheduleSave(); renderDay();
+};
+
 // ─── Whoop Actions ───────────────────────────────────────────────────────────
 
 window.autoFillHRV = async function() {
   const result = await fetchWhoopHRV();
   if (result.expired) {
-    renderRecovery(); // will now show "Connect Whoop" since token was cleared
+    renderRecovery();
   } else if (result.hrv) {
     const ak = S.recoveryActiveKey;
     S.recovery[ak] = {...(S.recovery[ak]||{}), hrv: result.hrv};
@@ -411,7 +542,7 @@ async function autoFetchOnLoad() {
   if (S.recovery[tk]?.hrv) return;
   const result = await fetchWhoopHRV();
   if (result.expired) {
-    renderRecovery(); // token cleared, will show reconnect button
+    renderRecovery();
   } else if (result.hrv) {
     S.recovery[tk] = {...(S.recovery[tk]||{}), hrv: result.hrv};
     scheduleSave();
@@ -438,10 +569,10 @@ window.getReadiness = async function() {
   }
   const todayDay = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][new Date().getDay()];
   const planMap = {
-    Mon: "Monday Strength — choose Plan A (Squat + Vertical Pull + Ankle Rebuild), Plan B (Bulgarian Split Squat + Row + Balance), or Plan C (Squat Variation + Horizontal Pull + Glute Accessory)",
+    Mon: "Monday Strength — choose Plan A (Squat + Press + Pull + Glute), Plan B (Bulgarian Split Squat + Row + Press + Glute), or Plan C (Squat Variation + Pull + Press + Glute)",
     Tue: "Tuesday Yoga — Leigh's heated vinyasa class",
     Wed: "Wednesday N4x4 Run or Pool Swim with Kevin",
-    Thu: "Thursday Strength + Explosive — choose Plan A (Hinge Heavy + Explosive Finish), Plan B (Power Day: Jumps + RDL), or Plan C (Explosive + Posterior Chain + Active Recovery)",
+    Thu: "Thursday Strength + Explosive — choose Plan A (Hinge Heavy + Explosive + Press + Pull), Plan B (Power Day: Jumps + RDL + Press + Pull), or Plan C (Explosive + Posterior Chain + Press + Pull)",
     Fri: "Friday Variable Day — options are Yoga, Pilates, Easy Zone 2 Run, Pool Swim, Kettlebells, N4x4 Run, or Rest"
   };
   const todayPlan = planMap[todayDay] || "Weekend active recovery";
@@ -494,11 +625,14 @@ window.analyzeHRChart = async function(event) {
 // ─── Render Helpers ──────────────────────────────────────────────────────────
 
 function workoutCardHTML(workout, sData) {
-  const checked=sData.checked||{}, notes=sData.notes||{};
+  const checked=sData.checked||{}, notes=sData.notes||{}, weights=sData.weights||{};
+  const curKey = sKey(S.weekOffset, S.selectedDay);
   const total=workout.blocks.filter(b=>b.sets).length;
   const done=workout.blocks.filter((b,i)=>b.sets&&checked[i]).length;
   const rows=workout.blocks.map((ex,i)=>{
     const c=!!checked[i];
+    const last = ex.sets ? getLastWeight(ex.name, curKey) : null;
+    const safeName = ex.name.replace(/'/g,"\\'");
     return `<div style="padding:12px 0;border-bottom:1px solid #1e2530;display:flex;gap:12px;align-items:flex-start;">
       <button onclick="toggleExercise(${i})" style="margin-top:2px;width:22px;height:22px;border-radius:4px;border:${c?"none":"2px solid #3a4555"};background:${c?"#4ade80":"transparent"};cursor:pointer;flex-shrink:0;color:#0f1117;font-weight:900;font-size:13px;">${c?"✓":""}</button>
       <div style="flex:1;">
@@ -507,8 +641,12 @@ function workoutCardHTML(workout, sData) {
           ${ex.sets?`<span style="color:#4ade80;font-size:13px;font-family:monospace;margin-left:8px;">${ex.sets}</span>`:""}
         </div>
         <div style="color:#6b7a90;font-size:13px;margin-top:2px;">${ex.notes}</div>
-        <input type="text" value="${esc(notes[i])}" placeholder="Notes..." onchange="setExerciseNote(${i},this.value)"
-          style="margin-top:6px;width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#c8d4e8;font-size:13px;padding:5px 8px;box-sizing:border-box;outline:none;">
+        <div style="display:flex;gap:8px;margin-top:6px;">
+          ${ex.sets ? `<input type="text" value="${esc(weights[ex.name])}" placeholder="${last?`last: ${esc(last.value)}`:'Weight/load'}" onchange="setExerciseWeight('${safeName}',this.value)"
+            style="flex:1;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#e8edf5;font-size:13px;padding:5px 8px;box-sizing:border-box;outline:none;">` : ""}
+          <input type="text" value="${esc(notes[i])}" placeholder="Notes..." onchange="setExerciseNote(${i},this.value)"
+            style="flex:2;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#c8d4e8;font-size:13px;padding:5px 8px;box-sizing:border-box;outline:none;">
+        </div>
       </div>
     </div>`;
   }).join("");
@@ -531,6 +669,55 @@ function workoutCardHTML(workout, sData) {
     <div style="margin-top:10px;"><div style="color:#6b7a90;font-size:12px;margin-bottom:4px;">Session note</div>
       <textarea rows="2" placeholder="Anything to remember..." onchange="setSessionField('sessionNote',this.value)"
         style="width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#c8d4e8;font-size:13px;padding:7px 10px;box-sizing:border-box;resize:none;outline:none;">${esc(sData.sessionNote)}</textarea></div>`;
+}
+
+function customExercisesHTML(sData) {
+  const list = sData.customExercises || [];
+  const weights = sData.weights || {};
+  const curKey = sKey(S.weekOffset, S.selectedDay);
+  const rows = list.map(ex => {
+    const c = !!ex.checked;
+    const last = getLastWeight(ex.name, curKey);
+    const safeName = ex.name.replace(/'/g,"\\'");
+    return `<div style="padding:12px 0;border-bottom:1px solid #1e2530;display:flex;gap:12px;align-items:flex-start;">
+      <button onclick="toggleCustomExercise('${ex.id}')" style="margin-top:2px;width:22px;height:22px;border-radius:4px;border:${c?"none":"2px solid #3a4555"};background:${c?"#4ade80":"transparent"};cursor:pointer;flex-shrink:0;color:#0f1117;font-weight:900;font-size:13px;">${c?"✓":""}</button>
+      <div style="flex:1;">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;">
+          <span style="color:${c?"#6b7a90":"#e8edf5"};font-weight:600;font-size:15px;text-decoration:${c?"line-through":"none"};">${esc(ex.name)}${ex.videoUrl?` <a href="${esc(ex.videoUrl)}" target="_blank" style="color:#4ade80;font-size:12px;">🔗</a>`:""}</span>
+          ${ex.sets?`<span style="color:#4ade80;font-size:13px;font-family:monospace;margin-left:8px;">${esc(ex.sets)}</span>`:""}
+        </div>
+        <div style="display:flex;gap:8px;margin-top:6px;">
+          <input type="text" value="${esc(weights[ex.name])}" placeholder="${last?`last: ${esc(last.value)}`:'Weight/load'}" onchange="setExerciseWeight('${safeName}',this.value)"
+            style="flex:1;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#e8edf5;font-size:13px;padding:5px 8px;box-sizing:border-box;outline:none;">
+          <input type="text" value="${esc(ex.note)}" placeholder="Notes..." onchange="setCustomExerciseNote('${ex.id}',this.value)"
+            style="flex:2;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#c8d4e8;font-size:13px;padding:5px 8px;box-sizing:border-box;outline:none;">
+        </div>
+      </div>
+      <button onclick="removeCustomExercise('${ex.id}')" style="color:#3a4555;background:none;border:none;font-size:16px;cursor:pointer;padding:0 4px;">&times;</button>
+    </div>`;
+  }).join("");
+  return `
+    <div style="margin-top:16px;">
+      ${list.length ? `<div style="color:#4ade80;font-size:12px;font-weight:700;letter-spacing:1px;margin-bottom:4px;">ADDED TODAY</div>${rows}` : ""}
+      <div style="display:flex;gap:6px;margin-top:10px;">
+        <input type="text" id="custom-ex-name" placeholder="Exercise name" style="flex:2;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#e8edf5;font-size:13px;padding:7px 8px;box-sizing:border-box;outline:none;">
+        <input type="text" id="custom-ex-sets" placeholder="Sets (opt)" style="flex:1;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#e8edf5;font-size:13px;padding:7px 8px;box-sizing:border-box;outline:none;">
+        <button onclick="addCustomExercise()" style="padding:7px 14px;border-radius:6px;border:none;background:#4ade80;color:#0f1117;font-weight:700;font-size:13px;cursor:pointer;">+ Add</button>
+      </div>
+    </div>`;
+}
+
+function queueTeaserHTML() {
+  const items = S.videoQueue || [];
+  if (!items.length) return "";
+  const item = items[0];
+  return `<div style="background:#0d1520;border-radius:8px;padding:10px 12px;border:1px solid #1e3a2a;margin-top:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;">
+    <div style="min-width:0;">
+      <div style="color:#4ade80;font-size:11px;font-weight:700;letter-spacing:1px;margin-bottom:2px;">🎥 FROM YOUR QUEUE</div>
+      <div style="color:#c8d4e8;font-size:13px;">${esc(item.label)}</div>
+    </div>
+    <button onclick="pullQueueItem('${item.id}')" style="flex-shrink:0;padding:7px 12px;border-radius:6px;border:none;background:#4ade80;color:#0f1117;font-weight:700;font-size:12px;cursor:pointer;">Add to today</button>
+  </div>`;
 }
 
 function restHTML(sData) {
@@ -560,7 +747,9 @@ function renderDay() {
 
   if(d==="Mon") {
     const monIdx = sData.monPlan !== undefined ? sData.monPlan : S.monPlan;
-    el.innerHTML = planBtnRow(MONDAY,monIdx,"setMonPlan") + workoutCardHTML(MONDAY[monIdx],sData) + restBtn();
+    const monSugg = getStrengthSuggestion("Mon", MONDAY, "monPlan");
+    const monSuggHTML = monSugg ? `<div style="background:#0d1520;border-radius:8px;padding:10px 12px;border:1px solid #1e3a2a;margin-bottom:10px;"><div style="color:#4ade80;font-size:12px;font-weight:700;margin-bottom:4px;">SUGGESTED</div><div style="color:#9bacc0;font-size:13px;">${monSugg.reason}</div></div>` : "";
+    el.innerHTML = monSuggHTML + planBtnRow(MONDAY,monIdx,"setMonPlan") + workoutCardHTML(MONDAY[monIdx],sData) + customExercisesHTML(sData) + queueTeaserHTML() + restBtn();
   } else if(d==="Tue") {
     const y=sData.yogaDone,p=sData.plungeDone;
     const feelOpts=["","💪 Strong flow","✅ Solid class","😐 Meh","🪫 Low energy"].map(o=>`<option value="${o}"${sData.feel===o?" selected":""}>${o||"Select..."}</option>`).join("");
@@ -576,17 +765,14 @@ function renderDay() {
       <textarea rows="2" placeholder="Note..." onchange="setSessionField('sessionNote',this.value)" style="width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#c8d4e8;font-size:13px;padding:7px 10px;box-sizing:border-box;resize:none;outline:none;">${esc(sData.sessionNote)}</textarea>
       ${restBtn()}`;
   } else if(d==="Wed") {
-    const m=sData.modality;
-    const isRun=m==="run",isSwim=m==="swim",isLong=m==="longrun",isPilates=m==="pilates",isKB=m==="kb";
-    const modBtns=[
-      ["run","🏃 N4x4 Run"],["swim","🏊 Pool w/ Kevin"],["longrun","🏃 Long Run"],["pilates","⭕ Pilates"],["kb","🔔 Kettlebells"]
-    ].map(([val,label])=>`<button onclick="setSessionField('modality','${val}')" style="padding:8px 12px;border-radius:20px;border:${m===val?"none":"1px solid #2a3545"};background:${m===val?"#4ade80":"#1a2030"};color:${m===val?"#0f1117":"#9bacc0"};font-weight:600;font-size:13px;cursor:pointer;">${label}</button>`).join("");
-    const showHRChart = isRun;
+    const isR=sData.modality==="run",isS=sData.modality==="swim";
     el.innerHTML=`
-      <div style="color:#c8d4e8;font-weight:600;margin-bottom:4px;">Wednesday Cardio</div>
-      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;">${modBtns}</div>
-      ${isRun ? `
-      <div style="color:#6b7a90;font-size:13px;margin-bottom:14px;">4x4 min at 170-177 bpm, 3 min recovery below 130.</div>
+      <div style="color:#c8d4e8;font-weight:600;margin-bottom:4px;">N4x4 or Pool with Kevin</div>
+      <div style="color:#6b7a90;font-size:13px;margin-bottom:14px;">Run: 4x4 min at 170-177 bpm, 3 min recovery below 130. Swim: 4x4 min hard, rest ~3 min.</div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;">
+        <button onclick="setSessionField('modality','run')" style="flex:1;padding:10px 0;border-radius:8px;border:${isR?"none":"1px solid #2a3545"};background:${isR?"#4ade80":"#1a2030"};color:${isR?"#0f1117":"#9bacc0"};font-weight:600;font-size:14px;cursor:pointer;">🏃 N4x4 Run</button>
+        <button onclick="setSessionField('modality','swim')" style="flex:1;padding:10px 0;border-radius:8px;border:${isS?"none":"1px solid #2a3545"};background:${isS?"#4ade80":"#1a2030"};color:${isS?"#0f1117":"#9bacc0"};font-weight:600;font-size:14px;cursor:pointer;">🏊 Pool w/ Kevin</button>
+      </div>
       ${sData.hrAnalysis ? `
       <div style="background:#141b26;border-radius:10px;padding:12px 14px;margin-bottom:10px;border:1px solid #1e3a2a;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
@@ -602,22 +788,21 @@ function renderDay() {
         <div style="flex:1;"><div style="color:#6b7a90;font-size:12px;margin-bottom:4px;">Avg HR work intervals</div><input type="number" value="${esc(sData.avgHR)}" onchange="setSessionField('avgHR',this.value)" style="width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#e8edf5;font-size:15px;padding:7px 10px;box-sizing:border-box;outline:none;"></div>
         <div style="flex:1;"><div style="color:#6b7a90;font-size:12px;margin-bottom:4px;">RPE (1-10)</div><input type="number" min="1" max="10" value="${esc(sData.rpe)}" onchange="setSessionField('rpe',this.value)" style="width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#e8edf5;font-size:15px;padding:7px 10px;box-sizing:border-box;outline:none;"></div>
       </div>
-      <div style="margin-bottom:10px;">
+      <div style="margin-top:0px;margin-bottom:10px;">
         <label style="display:block;padding:12px;background:#141b26;border:1px dashed #2a3545;border-radius:8px;text-align:center;cursor:pointer;color:#6b7a90;font-size:13px;">
           📈 Upload HR chart for rep analysis
           <input type="file" accept="image/*" onchange="analyzeHRChart(event)" style="display:none;">
         </label>
         <div id="hr-analysis" style="margin-top:10px;"></div>
-      </div>`}` : `
-      <div style="display:flex;gap:8px;margin-bottom:10px;">
-        <div style="flex:1;"><div style="color:#6b7a90;font-size:12px;margin-bottom:4px;">RPE (1-10)</div><input type="number" min="1" max="10" value="${esc(sData.rpe)}" onchange="setSessionField('rpe',this.value)" style="width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#e8edf5;font-size:15px;padding:7px 10px;box-sizing:border-box;outline:none;"></div>
       </div>`}
-      <textarea rows="2" placeholder="Notes..." onchange="setSessionField('sessionNote',this.value)" style="width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#c8d4e8;font-size:13px;padding:7px 10px;box-sizing:border-box;resize:none;outline:none;">${esc(sData.sessionNote)}</textarea>
+      <textarea rows="2" placeholder="Intervals felt... ankle... Kevin's splits..." onchange="setSessionField('sessionNote',this.value)" style="width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#c8d4e8;font-size:13px;padding:7px 10px;box-sizing:border-box;resize:none;outline:none;">${esc(sData.sessionNote)}</textarea>
       ${restBtn()}`;
   } else if(d==="Thu") {
     const thuIdx = sData.thuPlan !== undefined ? sData.thuPlan : S.thuPlan;
     const pre=sData.plungePreLift,skip=sData.plungeSkipped;
-    el.innerHTML = planBtnRow(THURSDAY,thuIdx,"setThuPlan") + workoutCardHTML(THURSDAY[thuIdx],sData) + `
+    const thuSugg = getStrengthSuggestion("Thu", THURSDAY, "thuPlan");
+    const thuSuggHTML = thuSugg ? `<div style="background:#0d1520;border-radius:8px;padding:10px 12px;border:1px solid #1e3a2a;margin-bottom:10px;"><div style="color:#4ade80;font-size:12px;font-weight:700;margin-bottom:4px;">SUGGESTED</div><div style="color:#9bacc0;font-size:13px;">${thuSugg.reason}</div></div>` : "";
+    el.innerHTML = thuSuggHTML + planBtnRow(THURSDAY,thuIdx,"setThuPlan") + workoutCardHTML(THURSDAY[thuIdx],sData) + customExercisesHTML(sData) + queueTeaserHTML() + `
       <div style="margin-top:14px;background:#0d1520;border-radius:8px;padding:10px 12px;border:1px solid #1e3a2a;">
         <div style="color:#4ade80;font-size:12px;font-weight:700;margin-bottom:4px;">🧊 COLD PLUNGE</div>
         <div style="color:#6b7a90;font-size:13px;">Before lifting, or 4-6 hrs after. Not immediately post-strength.</div>
@@ -798,6 +983,30 @@ function renderRecovery() {
     ${trendHTML}`;
 }
 
+function renderQueue() {
+  const el = document.getElementById("queue-content"); if (!el) return;
+  const items = S.videoQueue || [];
+  const rows = items.map(item => `
+    <div style="background:#141b26;border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:10px;">
+      <div style="flex:1;min-width:0;">
+        <div style="color:#e8edf5;font-weight:600;font-size:14px;">${esc(item.label)}</div>
+        <a href="${esc(item.url)}" target="_blank" style="color:#4ade80;font-size:12px;word-break:break-all;">${esc(item.url)}</a>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0;">
+        <button onclick="pullQueueItem('${item.id}')" style="padding:6px 10px;border-radius:6px;border:none;background:#4ade80;color:#0f1117;font-weight:700;font-size:12px;cursor:pointer;">Add to today</button>
+        <button onclick="removeQueueItem('${item.id}')" style="background:none;border:none;color:#3a4555;font-size:16px;cursor:pointer;">&times;</button>
+      </div>
+    </div>`).join("");
+  el.innerHTML = `
+    <div style="color:#6b7a90;font-size:13px;margin-bottom:16px;">Paste links to workouts you want to try. Pull one into Monday or Thursday when you're ready to actually do it.</div>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:20px;background:#141b26;border-radius:10px;padding:12px;">
+      <input type="text" id="queue-label" placeholder="What is it? (e.g. 'that shoulder thing')" style="background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#e8edf5;font-size:14px;padding:8px 10px;box-sizing:border-box;outline:none;">
+      <input type="text" id="queue-url" placeholder="Paste link" style="background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#e8edf5;font-size:14px;padding:8px 10px;box-sizing:border-box;outline:none;">
+      <button onclick="addQueueItem()" style="padding:9px 0;border-radius:6px;border:none;background:#4ade80;color:#0f1117;font-weight:700;font-size:14px;cursor:pointer;">+ Save to queue</button>
+    </div>
+    ${items.length ? rows : `<div style="text-align:center;color:#6b7a90;margin-top:40px;"><div style="font-size:28px;margin-bottom:10px;">🎥</div><div>Nothing saved yet.</div></div>`}`;
+}
+
 // ─── Main Render ─────────────────────────────────────────────────────────────
 
 function renderAll() {
@@ -832,19 +1041,21 @@ function renderAll() {
         </div>
         <div id="recovery-view" style="padding:16px 18px 80px;display:none;"><div id="recovery-content"></div></div>
         <div id="log-view" style="padding:16px 18px 80px;display:none;"><div id="log-content"></div></div>
+        <div id="queue-view" style="padding:16px 18px 80px;display:none;"><div id="queue-content"></div></div>
         <div id="save-badge" style="display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);border:1px solid;border-radius:20px;padding:7px 16px;font-size:13px;z-index:100;white-space:nowrap;"></div>
       </div>`;
   }
   const nav=document.getElementById("nav-bar");
-  if(nav) nav.innerHTML=[["today","Workouts"],["recovery","Recovery"],["log","Log"]].map(([v,label])=>`<button onclick="setView('${v}')" style="flex:1;padding:8px 0;border-radius:8px 8px 0 0;border:none;background:${S.view===v?"#141b26":"transparent"};color:${S.view===v?"#e8edf5":"#6b7a90"};font-weight:600;font-size:14px;cursor:pointer;">${label}</button>`).join("");
-  ["workouts-view","recovery-view","log-view"].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display="none";});
-  const activeId=S.view==="today"?"workouts-view":S.view==="recovery"?"recovery-view":"log-view";
+  if(nav) nav.innerHTML=[["today","Workouts"],["recovery","Recovery"],["log","Log"],["queue","Queue"]].map(([v,label])=>`<button onclick="setView('${v}')" style="flex:1;padding:8px 0;border-radius:8px 8px 0 0;border:none;background:${S.view===v?"#141b26":"transparent"};color:${S.view===v?"#e8edf5":"#6b7a90"};font-weight:600;font-size:13px;cursor:pointer;">${label}</button>`).join("");
+  ["workouts-view","recovery-view","log-view","queue-view"].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display="none";});
+  const activeId=S.view==="today"?"workouts-view":S.view==="recovery"?"recovery-view":S.view==="queue"?"queue-view":"log-view";
   const av=document.getElementById(activeId); if(av) av.style.display="block";
   renderHeader();
   renderDayTabs();
   renderDay();
   renderLog();
   renderRecovery();
+  renderQueue();
   renderHRVAlert();
 }
 
@@ -882,7 +1093,6 @@ window.dismissHRVAlert = function() {
 // ─── Boot ────────────────────────────────────────────────────────────────────
 
 try {
-  // Hide app until auth resolves
   document.getElementById("app").style.display = "none";
   initFirebase();
 } catch(e) {
