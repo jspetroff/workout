@@ -167,7 +167,7 @@ const DAY_LABELS = {Mon:"Strength",Tue:"Yoga + Cold",Wed:"N4x4 or Swim",Thu:"Str
 
 const S = {
   sessions: {}, recovery: {},
-  view: "today", weekOffset: 0,
+  view: "recovery", weekOffset: 0,
   selectedDay: ({0:"Sun",1:"Mon",2:"Tue",3:"Wed",4:"Thu",5:"Fri",6:"Sat"})[new Date().getDay()],
   monPlan: 0, thuPlan: 0,
   saveStatus: "idle",
@@ -1098,6 +1098,7 @@ function renderAll() {
           <div id="day-tabs" style="display:flex;gap:6px;margin-bottom:18px;overflow-x:auto;"></div>
           <div id="day-label" style="color:#6b7a90;font-size:12px;letter-spacing:1px;margin-bottom:12px;"></div>
           <div id="day-content"></div>
+          <button onclick="setView('log')" style="margin-top:20px;width:100%;padding:10px 0;border-radius:8px;border:1px solid #2a3545;background:transparent;color:#6b7a90;font-size:13px;cursor:pointer;">📓 View Log</button>
         </div>
         <div id="recovery-view" style="padding:16px 18px 80px;display:none;"><div id="recovery-content"></div></div>
         <div id="log-view" style="padding:16px 18px 80px;display:none;"><div id="log-content"></div></div>
@@ -1106,7 +1107,7 @@ function renderAll() {
       </div>`;
   }
   const nav=document.getElementById("nav-bar");
-  if(nav) nav.innerHTML=[["today","Workouts"],["recovery","Recovery"],["log","Log"],["queue","Queue"]].map(([v,label])=>`<button onclick="setView('${v}')" style="flex:1;padding:8px 0;border-radius:8px 8px 0 0;border:none;background:${S.view===v?"#141b26":"transparent"};color:${S.view===v?"#e8edf5":"#6b7a90"};font-weight:600;font-size:13px;cursor:pointer;">${label}</button>`).join("");
+  if(nav) nav.innerHTML=[["today","Workouts"],["recovery","Recovery"],["queue","Queue"]].map(([v,label])=>`<button onclick="setView('${v}')" style="flex:1;padding:8px 0;border-radius:8px 8px 0 0;border:none;background:${S.view===v?"#141b26":"transparent"};color:${S.view===v?"#e8edf5":"#6b7a90"};font-weight:600;font-size:13px;cursor:pointer;">${label}</button>`).join("");
   ["workouts-view","recovery-view","log-view","queue-view"].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display="none";});
   const activeId=S.view==="today"?"workouts-view":S.view==="recovery"?"recovery-view":S.view==="queue"?"queue-view":"log-view";
   const av=document.getElementById(activeId); if(av) av.style.display="block";
