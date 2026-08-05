@@ -820,6 +820,7 @@ function renderDay() {
       <div style="color:#6b7a90;font-size:12px;margin-bottom:4px;">Feel</div>
       <select onchange="setSessionField('feel',this.value)" style="width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:${sData.feel?"#e8edf5":"#6b7a90"};font-size:14px;padding:8px 10px;box-sizing:border-box;outline:none;margin-bottom:10px;">${feelOpts}</select>
       <textarea rows="2" placeholder="Note..." onchange="setSessionField('sessionNote',this.value)" style="width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#c8d4e8;font-size:13px;padding:7px 10px;box-sizing:border-box;resize:none;outline:none;">${esc(sData.sessionNote)}</textarea>
+      ${customExercisesHTML(sData)}
       ${restBtn()}`;
   } else if(d==="Wed") {
     const isR=sData.modality==="run",isS=sData.modality==="swim",isLong=sData.modality==="longrun",isPilates=sData.modality==="pilates",isKB=sData.modality==="kb";
@@ -856,6 +857,7 @@ function renderDay() {
         <div id="hr-analysis" style="margin-top:10px;"></div>
       </div>`}
       <textarea rows="2" placeholder="Intervals felt... ankle... Kevin's splits..." onchange="setSessionField('sessionNote',this.value)" style="width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#c8d4e8;font-size:13px;padding:7px 10px;box-sizing:border-box;resize:none;outline:none;">${esc(sData.sessionNote)}</textarea>
+      ${customExercisesHTML(sData)}
       ${restBtn()}`;
   } else if(d==="Thu") {
     const thuIdx = sData.thuPlan !== undefined ? sData.thuPlan : S.thuPlan;
@@ -885,6 +887,7 @@ function renderDay() {
         <div style="flex:2;"><div style="color:#6b7a90;font-size:12px;margin-bottom:4px;">Feel</div><select onchange="setSessionField('feel',this.value)" style="width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:${sData.feel?"#e8edf5":"#6b7a90"};font-size:14px;padding:8px 10px;box-sizing:border-box;outline:none;">${feelOpts}</select></div>
       </div>
       <textarea rows="3" placeholder="Notes — what you did, how the family felt, anything worth remembering..." onchange="setSessionField('sessionNote',this.value)" style="width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#c8d4e8;font-size:13px;padding:7px 10px;box-sizing:border-box;resize:none;outline:none;">${esc(sData.sessionNote)}</textarea>
+      ${customExercisesHTML(sData)}
       ${restBtn()}`;
   } else if(d==="Fri") {
     const pick=sData.fridgePick;
@@ -928,7 +931,8 @@ function renderDay() {
         <div style="flex:1;"><div style="color:#6b7a90;font-size:12px;margin-bottom:4px;">RPE</div><input type="number" min="1" max="10" value="${esc(sData.rpe)}" onchange="setSessionField('rpe',this.value)" style="width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#e8edf5;font-size:15px;padding:7px 10px;box-sizing:border-box;outline:none;"></div>
         <div style="flex:2;"><div style="color:#6b7a90;font-size:12px;margin-bottom:4px;">Feel</div><select onchange="setSessionField('feel',this.value)" style="width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:${sData.feel?"#e8edf5":"#6b7a90"};font-size:14px;padding:8px 10px;box-sizing:border-box;outline:none;">${feelOpts}</select></div>
       </div>
-      <textarea rows="2" placeholder="Note..." onchange="setSessionField('sessionNote',this.value)" style="width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#c8d4e8;font-size:13px;padding:7px 10px;box-sizing:border-box;resize:none;outline:none;">${esc(sData.sessionNote)}</textarea>`;
+      <textarea rows="2" placeholder="Note..." onchange="setSessionField('sessionNote',this.value)" style="width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#c8d4e8;font-size:13px;padding:7px 10px;box-sizing:border-box;resize:none;outline:none;">${esc(sData.sessionNote)}</textarea>
+      ${customExercisesHTML(sData)}`;
   }
 }
 
