@@ -652,7 +652,7 @@ window.getReadiness = async function() {
   const hrvValues = last7keys.map(k => S.recovery[k]?.hrv).filter(Boolean).map(Number);
   const hrvAvg = hrvValues.length ? Math.round(hrvValues.reduce((a,b)=>a+b,0)/hrvValues.length) : null;
   try {
-    const res = await fetch("https://getreadiness-998100432483.us-central1.run.app", {
+    const res = await fetch("https://getreadiness-5iz3hgmcda-uc.a.run.app", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({hrv, hrvAvg, load, recentSessions, todayPlan, ruleBasedSuggestion})
