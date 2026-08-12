@@ -640,6 +640,14 @@ window.getReadiness = async function() {
     Fri: "Friday Variable Day — options are Yoga, Pilates, Easy Zone 2 Run, Pool Swim, Kettlebells, N4x4 Run, or Rest"
   };
   const todayPlan = planMap[todayDay] || "Weekend active recovery";
+  let ruleBasedSuggestion = null;
+  if (todayDay === "Mon") {
+    const s = getStrengthSuggestion("Mon", MONDAY, "monPlan");
+    if (s) ruleBasedSuggestion = `Plan ${MONDAY[s.idx].label} — ${s.reason}`;
+  } else if (todayDay === "Thu") {
+    const s = getStrengthSuggestion("Thu", THURSDAY, "thuPlan");
+    if (s) ruleBasedSuggestion = `Plan ${THURSDAY[s.idx].label} — ${s.reason}`;
+  }
   const last7keys = last7();
   const hrvValues = last7keys.map(k => S.recovery[k]?.hrv).filter(Boolean).map(Number);
   const hrvAvg = hrvValues.length ? Math.round(hrvValues.reduce((a,b)=>a+b,0)/hrvValues.length) : null;
@@ -647,7 +655,7 @@ window.getReadiness = async function() {
     const res = await fetch("https://getreadiness-998100432483.us-central1.run.app", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({hrv, hrvAvg, load, recentSessions, todayPlan})
+      body: JSON.stringify({hrv, hrvAvg, load, recentSessions, todayPlan, ruleBasedSuggestion})
     });
     const data = await res.json();
     const text = data.recommendation || "Could not get recommendation.";
