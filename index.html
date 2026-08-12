@@ -99,7 +99,7 @@ async function fetchWhoopHRV() {
 // `intensity` drives the recovery-based plan suggestion below.
 
 const MONDAY = [
-  { id:"mon-a", label:"A", theme:"Squat + Press + Pull + Glute", intensity:"moderate", blocks:[
+  { id:"mon-a", label:"A", theme:"Squat + Press + Pull + Glute", blocks:[
     {name:"Warmup",sets:null,notes:"Sun salutations / hip 90-90 / glute activation"},
     {name:"Goblet Squat (tempo 3-1-1)",sets:"3x8",notes:"Slow eccentric. Full depth."},
     {name:"DB Bench Press or Incline Press",sets:"4x8",notes:"Full ROM. Control the eccentric."},
@@ -107,7 +107,7 @@ const MONDAY = [
     {name:"Single-Leg RDL",sets:"3x8 each",notes:"Glute squeeze at top. Balance carries incidentally here."},
     {name:"Cable Pull-Through or Banded Glute Bridge",sets:"3x12",notes:"Glute isolation finisher. Squeeze, don't rush."},
   ]},
-  { id:"mon-b", label:"B", theme:"Bulgarian Split Squat + Row + Press + Glute", intensity:"high", blocks:[
+  { id:"mon-b", label:"B", theme:"Bulgarian Split Squat + Row + Press + Glute", blocks:[
     {name:"Warmup",sets:null,notes:"Sun salutations / hip 90-90 mobility"},
     {name:"Bulgarian Split Squat",sets:"4x6 each",notes:"Rear foot elevated. Glute squeeze at top."},
     {name:"Chest-Supported DB Row",sets:"4x10",notes:"Elbows back, squeeze at top. No momentum."},
@@ -115,7 +115,7 @@ const MONDAY = [
     {name:"Hip Thrust",sets:"3x12",notes:"Barbell or band. Primary glute driver."},
     {name:"Farmer Carry",sets:"3x40 yds",notes:"Heavy. Core stiffness, posture."},
   ]},
-  { id:"mon-c", label:"C", theme:"Squat Variation + Pull + Press + Glute", intensity:"high", blocks:[
+  { id:"mon-c", label:"C", theme:"Squat Variation + Pull + Press + Glute", blocks:[
     {name:"Warmup",sets:null,notes:"Sun salutations / lateral band walks"},
     {name:"Front Squat or Safety Bar Squat",sets:"4x5",notes:"Upright torso. Go as deep as comfortable."},
     {name:"Inverted Row or Cable Row",sets:"4x10",notes:"Full protraction to retraction. Keep hips stiff."},
@@ -126,7 +126,7 @@ const MONDAY = [
 ];
 
 const THURSDAY = [
-  { id:"thu-a", label:"A", theme:"Hinge Heavy + Explosive + Press + Pull", intensity:"high", blocks:[
+  { id:"thu-a", label:"A", theme:"Hinge Heavy + Explosive + Press + Pull", blocks:[
     {name:"Warmup",sets:null,notes:"Hip 90-90 / cat-cow / glute activation"},
     {name:"Trap Bar Deadlift",sets:"4x5",notes:"Go heavy. Neutral spine, push the floor away."},
     {name:"Box Jump (bilateral)",sets:"4x4",notes:"Step down, don't jump down."},
@@ -134,7 +134,7 @@ const THURSDAY = [
     {name:"DB Bench or Push Press",sets:"3x8",notes:"Pick one — alternate week to week."},
     {name:"Back Extension or Nordic Curl",sets:"3x10",notes:"Posterior chain finisher. Control the eccentric."},
   ]},
-  { id:"thu-b", label:"B", theme:"Power Day: Jumps + RDL + Press + Pull", intensity:"moderate", blocks:[
+  { id:"thu-b", label:"B", theme:"Power Day: Jumps + RDL + Press + Pull", blocks:[
     {name:"Warmup",sets:null,notes:"Dynamic hip openers / jump rope easy 3 min"},
     {name:"Broad Jump",sets:"5x3",notes:"Max intent. Bilateral. Absorb through hips."},
     {name:"Romanian Deadlift",sets:"4x8",notes:"Full hamstring stretch. Slow eccentric (3 sec down)."},
@@ -142,7 +142,7 @@ const THURSDAY = [
     {name:"Overhead Press or DB Bench",sets:"3x8",notes:"Alternate with Thu-A's press pick for variety."},
     {name:"Dead Bug",sets:"3x8 each",notes:"Core control. Slow and deliberate."},
   ]},
-  { id:"thu-c", label:"C", theme:"Explosive + Posterior Chain + Press + Pull", intensity:"high", blocks:[
+  { id:"thu-c", label:"C", theme:"Explosive + Posterior Chain + Press + Pull", blocks:[
     {name:"Warmup",sets:null,notes:"Sun salutations / hip flexor stretch"},
     {name:"Hang Power Clean or DB Jump Squat",sets:"4x4",notes:"Clean mechanics first. Otherwise DB jump squat."},
     {name:"Single-Leg RDL (loaded)",sets:"3x8 each",notes:"Heaviest of the three RDL variants this week. Balance carries incidentally."},
@@ -276,47 +276,6 @@ function getWeightHistory(name) {
     .map(k => ({ date: sessionKeyToDate(k), value: S.sessions[k].weights[name] }))
     .filter(e => e.date)
     .sort((a,b) => a.date - b.date);
-}
-
-// Recovery-based plan suggestion for Mon/Thu. Poor recovery -> suggest the
-// moderate-intensity variant. Otherwise -> suggest a high-intensity variant,
-// preferring one that's not simply a repeat of last week's exact plan.
-function getStrengthSuggestion(dayName, plans, planField) {
-  const ak = todayKey();
-  const todayRec = S.recovery[ak] || {};
-  const streak = getHRVStreak();
-  const poorRecovery = streak >= 3 || todayRec.load === "a lot";
-  const heavyLoad = todayRec.load === "heavy";
-
-  const lastWeekSess = getSess(S.weekOffset - 1, dayName);
-  const lastPlanIdx = lastWeekSess[planField];
-  const lastPlan = lastPlanIdx !== undefined ? plans[lastPlanIdx] : null;
-
-  if (poorRecovery) {
-    const idx = plans.findIndex(p => p.intensity === "moderate");
-    if (idx < 0) return null;
-    return {
-      idx,
-      reason: streak >= 3
-        ? `HRV down ${streak} days in a row — back off to Plan ${plans[idx].label} today.`
-        : "A lot going on — Plan " + plans[idx].label + " keeps you moving without piling on."
-    };
-  }
-  if (heavyLoad) {
-    const idx = plans.findIndex(p => p.intensity === "moderate");
-    if (idx < 0) return null;
-    return { idx, reason: "Life load is heavy — Plan " + plans[idx].label + " today." };
-  }
-  const highIdxs = plans.map((p,i)=>({p,i})).filter(x=>x.p.intensity==="high").map(x=>x.i);
-  if (!highIdxs.length) return null;
-  let idx = highIdxs.find(i => i !== lastPlanIdx);
-  if (idx === undefined) idx = highIdxs[0];
-  return {
-    idx,
-    reason: lastPlan
-      ? `Recovered well — Plan ${plans[idx].label} hasn't come up as recently as Plan ${lastPlan.label}.`
-      : "Recovered well — go heavy with Plan " + plans[idx].label + "."
-  };
 }
 
 // ─── Firebase ────────────────────────────────────────────────────────────────
@@ -616,13 +575,16 @@ async function autoFetchOnLoad() {
 
 // ─── Readiness ───────────────────────────────────────────────────────────────
 
-window.getReadiness = async function() {
-  const el = document.getElementById("readiness-result");
-  if (!el) return;
-  el.innerHTML = '<div style="background:#141b26;border-radius:10px;padding:12px 14px;color:#6b7a90;font-size:13px;">Getting recommendation...</div>';
-  const ak = S.recoveryActiveKey;
-  const hrv = S.recovery[ak]?.hrv;
-  const load = S.recovery[ak]?.load;
+// Fetches (or returns cached) AI recommendation for today. Cached in
+// S.recovery[todayKey()].aiRecommendation so it's called once per calendar
+// day regardless of how many day-tabs get viewed, not once per page view.
+async function fetchAIRecommendation(forceRefresh) {
+  const tk = todayKey();
+  if (!forceRefresh && S.recovery[tk]?.aiRecommendation) {
+    return S.recovery[tk].aiRecommendation;
+  }
+  const hrv = S.recovery[tk]?.hrv;
+  const load = S.recovery[tk]?.load;
   const recentSessions = [];
   for (let i = 0; i < 7; i++) {
     const d = new Date();
@@ -633,21 +595,13 @@ window.getReadiness = async function() {
   }
   const todayDay = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][new Date().getDay()];
   const planMap = {
-    Mon: "Monday Strength — choose Plan A (Squat + Press + Pull + Glute), Plan B (Bulgarian Split Squat + Row + Press + Glute), or Plan C (Squat Variation + Pull + Press + Glute)",
+    Mon: "Monday Strength — choose Plan A (Squat + Press + Pull + Glute), Plan B (Bulgarian Split Squat + Row + Press + Glute), or Plan C (Squat Variation + Pull + Press + Glute). Pick exactly one plan by letter based on the readiness data.",
     Tue: "Tuesday Yoga — Leigh's heated vinyasa class",
     Wed: "Wednesday N4x4 Run or Pool Swim with Kevin",
-    Thu: "Thursday Strength + Explosive — choose Plan A (Hinge Heavy + Explosive + Press + Pull), Plan B (Power Day: Jumps + RDL + Press + Pull), or Plan C (Explosive + Posterior Chain + Press + Pull)",
+    Thu: "Thursday Strength + Explosive — choose Plan A (Hinge Heavy + Explosive + Press + Pull), Plan B (Power Day: Jumps + RDL + Press + Pull), or Plan C (Explosive + Posterior Chain + Press + Pull). Pick exactly one plan by letter based on the readiness data.",
     Fri: "Friday Variable Day — options are Yoga, Pilates, Easy Zone 2 Run, Pool Swim, Kettlebells, N4x4 Run, or Rest"
   };
   const todayPlan = planMap[todayDay] || "Weekend active recovery";
-  let ruleBasedSuggestion = null;
-  if (todayDay === "Mon") {
-    const s = getStrengthSuggestion("Mon", MONDAY, "monPlan");
-    if (s) ruleBasedSuggestion = `Plan ${MONDAY[s.idx].label} — ${s.reason}`;
-  } else if (todayDay === "Thu") {
-    const s = getStrengthSuggestion("Thu", THURSDAY, "thuPlan");
-    if (s) ruleBasedSuggestion = `Plan ${THURSDAY[s.idx].label} — ${s.reason}`;
-  }
   const last7keys = last7();
   const hrvValues = last7keys.map(k => S.recovery[k]?.hrv).filter(Boolean).map(Number);
   const hrvAvg = hrvValues.length ? Math.round(hrvValues.reduce((a,b)=>a+b,0)/hrvValues.length) : null;
@@ -655,15 +609,54 @@ window.getReadiness = async function() {
     const res = await fetch("https://getreadiness-5iz3hgmcda-uc.a.run.app", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({hrv, hrvAvg, load, recentSessions, todayPlan, ruleBasedSuggestion})
+      body: JSON.stringify({hrv, hrvAvg, load, recentSessions, todayPlan})
     });
     const data = await res.json();
-    const text = data.recommendation || "Could not get recommendation.";
-    el.innerHTML = `<div style="background:#141b26;border-radius:10px;padding:14px;border:1px solid #1e3a2a;"><div style="color:#4ade80;font-size:12px;font-weight:700;letter-spacing:1px;margin-bottom:8px;">TODAY'S RECOMMENDATION</div><div style="color:#c8d4e8;font-size:14px;line-height:1.6;">${text}</div></div>`;
+    const text = data.recommendation || null;
+    if (text) {
+      S.recovery[tk] = { ...(S.recovery[tk]||{}), aiRecommendation: text };
+      scheduleSave();
+    }
+    return text;
   } catch (err) {
-    el.innerHTML = '<div style="color:#f87171;font-size:13px;padding:10px 0;">Could not get recommendation.</div>';
+    return null;
   }
+}
+
+let aiRecFetchInFlight = false;
+async function ensureAIRecommendationLoading() {
+  if (aiRecFetchInFlight) return;
+  aiRecFetchInFlight = true;
+  await fetchAIRecommendation(false);
+  aiRecFetchInFlight = false;
+  renderDay();
+  renderRecovery();
+}
+
+window.refreshAIRecommendation = async function() {
+  aiRecFetchInFlight = true;
+  await fetchAIRecommendation(true);
+  aiRecFetchInFlight = false;
+  renderDay();
+  renderRecovery();
 };
+
+// Renders the AI recommendation box — gated on HRV+load being logged today,
+// cached after first fetch, with a manual refresh option. Used on every
+// day's page and on the Recovery tab, so there's exactly one recommendation
+// system instead of two.
+function aiRecommendationBoxHTML() {
+  const tk = todayKey();
+  const rec = S.recovery[tk] || {};
+  if (!rec.hrv || !rec.load) {
+    return `<div style="background:#141b26;border-radius:10px;padding:12px 14px;margin-bottom:14px;color:#6b7a90;font-size:13px;text-align:center;">Enter today's HRV and life load in Recovery to get today's recommendation</div>`;
+  }
+  if (rec.aiRecommendation) {
+    return `<div style="background:#141b26;border-radius:10px;padding:14px;border:1px solid #1e3a2a;margin-bottom:14px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><div style="color:#4ade80;font-size:12px;font-weight:700;letter-spacing:1px;">TODAY'S RECOMMENDATION</div><button onclick="refreshAIRecommendation()" style="background:none;border:none;color:#6b7a90;font-size:12px;cursor:pointer;">&#x21BB; refresh</button></div><div style="color:#c8d4e8;font-size:14px;line-height:1.6;">${esc(rec.aiRecommendation)}</div></div>`;
+  }
+  ensureAIRecommendationLoading();
+  return `<div style="background:#141b26;border-radius:10px;padding:14px;border:1px solid #1e3a2a;margin-bottom:14px;color:#6b7a90;font-size:13px;">Getting today's recommendation...</div>`;
+}
 
 // ─── HR Chart Analysis ───────────────────────────────────────────────────────
 
@@ -812,13 +805,12 @@ function renderDay() {
 
   if(d==="Mon") {
     const monIdx = sData.monPlan !== undefined ? sData.monPlan : S.monPlan;
-    const monSugg = getStrengthSuggestion("Mon", MONDAY, "monPlan");
-    const monSuggHTML = monSugg ? `<div style="background:#0d1520;border-radius:8px;padding:10px 12px;border:1px solid #1e3a2a;margin-bottom:10px;"><div style="color:#4ade80;font-size:12px;font-weight:700;margin-bottom:4px;">SUGGESTED</div><div style="color:#9bacc0;font-size:13px;">${monSugg.reason}</div></div>` : "";
-    el.innerHTML = monSuggHTML + planBtnRow(MONDAY,monIdx,"setMonPlan") + workoutCardHTML(MONDAY[monIdx],sData) + customExercisesHTML(sData) + restBtn();
+    el.innerHTML = aiRecommendationBoxHTML() + planBtnRow(MONDAY,monIdx,"setMonPlan") + workoutCardHTML(MONDAY[monIdx],sData) + customExercisesHTML(sData) + restBtn();
   } else if(d==="Tue") {
     const y=sData.yogaDone,p=sData.plungeDone;
     const feelOpts=["","💪 Strong flow","✅ Solid class","😐 Meh","🪫 Low energy"].map(o=>`<option value="${o}"${sData.feel===o?" selected":""}>${o||"Select..."}</option>`).join("");
     el.innerHTML=`
+      ${aiRecommendationBoxHTML()}
       <div style="color:#c8d4e8;font-weight:600;margin-bottom:4px;">Leigh's 9:30 heated vinyasa</div>
       <div style="color:#6b7a90;font-size:13px;margin-bottom:16px;">Cold plunge after — 5 min. No strength conflict today.</div>
       <div style="display:flex;gap:10px;margin-bottom:16px;">
@@ -833,6 +825,7 @@ function renderDay() {
   } else if(d==="Wed") {
     const isR=sData.modality==="run",isS=sData.modality==="swim",isLong=sData.modality==="longrun",isPilates=sData.modality==="pilates",isKB=sData.modality==="kb";
     el.innerHTML=`
+      ${aiRecommendationBoxHTML()}
       <div style="color:#c8d4e8;font-weight:600;margin-bottom:4px;">N4x4 or Pool with Kevin</div>
       <div style="color:#6b7a90;font-size:13px;margin-bottom:14px;">Run: 4x4 min at 170-177 bpm, 3 min recovery below 130. Swim: 4x4 min hard, rest ~3 min.</div>
       <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
@@ -870,9 +863,7 @@ function renderDay() {
   } else if(d==="Thu") {
     const thuIdx = sData.thuPlan !== undefined ? sData.thuPlan : S.thuPlan;
     const pre=sData.plungePreLift,skip=sData.plungeSkipped;
-    const thuSugg = getStrengthSuggestion("Thu", THURSDAY, "thuPlan");
-    const thuSuggHTML = thuSugg ? `<div style="background:#0d1520;border-radius:8px;padding:10px 12px;border:1px solid #1e3a2a;margin-bottom:10px;"><div style="color:#4ade80;font-size:12px;font-weight:700;margin-bottom:4px;">SUGGESTED</div><div style="color:#9bacc0;font-size:13px;">${thuSugg.reason}</div></div>` : "";
-    el.innerHTML = thuSuggHTML + planBtnRow(THURSDAY,thuIdx,"setThuPlan") + workoutCardHTML(THURSDAY[thuIdx],sData) + customExercisesHTML(sData) + `
+    el.innerHTML = aiRecommendationBoxHTML() + planBtnRow(THURSDAY,thuIdx,"setThuPlan") + workoutCardHTML(THURSDAY[thuIdx],sData) + customExercisesHTML(sData) + `
       <div style="margin-top:14px;background:#0d1520;border-radius:8px;padding:10px 12px;border:1px solid #1e3a2a;">
         <div style="color:#4ade80;font-size:12px;font-weight:700;margin-bottom:4px;">🧊 COLD PLUNGE</div>
         <div style="color:#6b7a90;font-size:13px;">Before lifting, or 4-6 hrs after. Not immediately post-strength.</div>
@@ -886,6 +877,7 @@ function renderDay() {
     const actOpts=["","🚴 Bike ride","🏊 Pool","🧘 Yoga","🌿 Gardening / yard work","🥾 Walk / hike","🎮 Low key day","🏃 Run","Other"].map(o=>`<option value="${o}"${sData.activity===o?" selected":""}>${o||"What did you do?"}</option>`).join("");
     const feelOpts=["","💪 Strong","✅ Good","😐 Meh","🪫 Tired","😴 Rest needed"].map(o=>`<option value="${o}"${sData.feel===o?" selected":""}>${o||"Select..."}</option>`).join("");
     el.innerHTML=`
+      ${aiRecommendationBoxHTML()}
       <div style="color:#c8d4e8;font-weight:600;margin-bottom:4px;">${d==="Sat"?"Saturday":"Sunday"} — Family Time</div>
       <div style="color:#6b7a90;font-size:13px;margin-bottom:16px;">Log what you did and how you felt going into the week.</div>
       <div style="color:#6b7a90;font-size:12px;margin-bottom:4px;">What did you do?</div>
@@ -930,6 +922,7 @@ function renderDay() {
     const pickedOpt=pick?FRI_OPTIONS.find(f=>f.id===pick):null;
     const feelOpts=["","💪 Strong","✅ Solid","😐 Meh","🪫 Low energy"].map(o=>`<option value="${o}"${sData.feel===o?" selected":""}>${o||"Select..."}</option>`).join("");
     el.innerHTML=`
+      ${aiRecommendationBoxHTML()}
       <div style="color:#c8d4e8;font-weight:600;margin-bottom:4px;">Variable Day</div>
       ${suggHTML}
       <div style="color:#6b7a90;font-size:12px;margin-bottom:8px;">What did you do?</div>
@@ -1044,14 +1037,7 @@ function renderRecovery() {
           style="width:100%;background:#1a2030;border:1px solid #2a3545;border-radius:6px;color:#e8edf5;font-size:22px;font-weight:700;padding:10px 12px;box-sizing:border-box;outline:none;text-align:center;"></div>
       <div><div style="color:#6b7a90;font-size:12px;margin-bottom:8px;">Life load</div><div style="display:flex;gap:8px;">${loadBtns}</div></div>
     </div>
-    ${aData.hrv&&aData.load?`
-    <button onclick="getReadiness()" style="width:100%;padding:12px 0;border-radius:10px;border:none;background:#4ade80;color:#0f1117;font-weight:700;font-size:15px;cursor:pointer;margin-bottom:16px;">
-      Get today's workout recommendation
-    </button>
-    <div id="readiness-result" style="margin-bottom:16px;"></div>`:`
-    <div style="background:#141b26;border-radius:10px;padding:12px 14px;margin-bottom:16px;color:#6b7a90;font-size:13px;text-align:center;">
-      Enter HRV and life load above to get a workout recommendation
-    </div>`}
+    ${aiRecommendationBoxHTML()}
     ${trendHTML}`;
 }
 
