@@ -595,10 +595,10 @@ async function fetchAIRecommendation(forceRefresh) {
   }
   const todayDay = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][new Date().getDay()];
   const planMap = {
-    Mon: "Monday Strength — choose Plan A (Squat + Press + Pull + Glute), Plan B (Bulgarian Split Squat + Row + Press + Glute), or Plan C (Squat Variation + Pull + Press + Glute). Pick exactly one plan by letter based on the readiness data.",
+    Mon: "Monday Strength — Plan A (Landmine Squat + Press + Pull + Glute) is the moderate option. Plan B (Bulgarian Split Squat + Row + Press + Glute) and Plan C (Squat Variation + Pull + Press + Glute, includes the day's heaviest squat) are both harder than A and roughly matched with each other. On good recovery days, prefer B or C — rotate between them rather than defaulting to the same one every time. On poor recovery days, prefer A. Pick exactly one plan by letter based on the readiness data.",
     Tue: "Tuesday Yoga — Leigh's heated vinyasa class",
     Wed: "Wednesday N4x4 Run or Pool Swim with Kevin",
-    Thu: "Thursday Strength + Explosive — choose Plan A (Hinge Heavy + Explosive + Press + Pull), Plan B (Power Day: Jumps + RDL + Press + Pull), or Plan C (Explosive + Posterior Chain + Press + Pull). Pick exactly one plan by letter based on the readiness data.",
+    Thu: "Thursday Strength + Explosive — Plan A (Trap Bar Deadlift + Box Jump + Press + Pull) is the heaviest of the three: it's the only version with two genuinely maximal-load movements back to back. Plan B (Kettlebell + Lateral Explosiveness: Heavy KB Swing, Lateral Bound, Renegade Row, Push Press, Hip Thrust) and Plan C (Explosive + Posterior Chain: Hang Power Clean, Single-Leg RDL, Weighted Pull, Press, Back Extension) are both somewhat lighter than A, since each swaps one of A's heavy grinding movements for something balance- or technique-limited instead. On good recovery days, Plan A is the appropriate pick. On days that are good but not exceptional, or to avoid repeating A too often, B or C are reasonable. On poor recovery days, prefer B or C over A. Pick exactly one plan by letter based on the readiness data.",
     Fri: "Friday Variable Day — options are Yoga, Pilates, Easy Zone 2 Run, Pool Swim, Kettlebells, N4x4 Run, or Rest"
   };
   const todayPlan = planMap[todayDay] || "Weekend active recovery";
