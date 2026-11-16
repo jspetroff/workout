@@ -102,8 +102,11 @@ async function fetchWhoopHRV() {
 // the rules the server enforces when it builds a workout:
 //   heavy         — at most one per session; none on run-down days
 //   power         — jumps / Olympic lifts; at most one per session
-//   recoveredOnly — only on recovered days; on recovered days the main lift
-//                   must be one of these
+//   recoveredOnly — not on run-down days; on other days the main lift must
+//                   be one of these
+// Lighter (in-between) days use the same menu with one set fewer on the main
+// lift, so the squat / hinge rotation keeps going. Split squats and KB swings
+// only lead on run-down days.
 // Adding or swapping an exercise here changes the menu too, no server deploy.
 
 const MONDAY = [
@@ -618,7 +621,7 @@ const STRENGTH_SLOTS = {
 };
 const TIER_THEMES = {
   recovered: "Recovered — full session",
-  in_between: "In between — lighter main lift",
+  in_between: "In between — one set fewer on the main lift",
   run_down: "Run down — lightest options, one set fewer",
 };
 // The last session logged with one of these feels (within 3 days) makes today
@@ -744,16 +747,19 @@ function assembleAIWorkout(day, menu, readiness, data) {
   const mainSlot = menu.find(s => s.key==="main");
   const main = mainSlot ? picks[menu.indexOf(mainSlot)] : null;
   if ((readiness.triggers.length > 0) !== (tier==="run_down")) throw new Error("tier doesn't match the run-down triggers");
-  if (tier!=="recovered" && picks.some(o => has(o,"recoveredOnly"))) throw new Error("recovered-only exercise on a " + tier + " day");
+  if (tier==="run_down" && picks.some(o => has(o,"recoveredOnly"))) throw new Error("recovered-only exercise on a run-down day");
   if (tier==="run_down" && picks.some(o => has(o,"heavy"))) throw new Error("heavy exercise on a run-down day");
   if (picks.filter(o => has(o,"heavy")).length > 1) throw new Error("more than one heavy exercise");
   if (picks.filter(o => has(o,"power")).length > 1) throw new Error("more than one power exercise");
   if (tier==="recovered" && main && mainSlot.options.some(o => has(o,"recoveredOnly")) && !has(main,"recoveredOnly")) throw new Error("recovered day without a recovered-only main lift");
   const plans = day==="Mon" ? MONDAY : THURSDAY;
   const warmup = plans[(main || picks[0]).planIdx].blocks.find(b => !b.sets);
-  const cut = sets => tier==="run_down" ? sets.replace(/^(\d+)x/, (m, n) => Math.max(2, Number(n)-1) + "x") : sets;
+  // Run-down days take a set off everything (never below 2); in-between days
+  // take one off the main lift only.
+  const cutOne = sets => sets.replace(/^(\d+)x/, (m, n) => Math.max(2, Number(n)-1) + "x");
+  const setsFor = (o, i) => tier==="run_down" || (tier==="in_between" && menu[i].key==="main") ? cutOne(o.sets) : o.sets;
   const blocks = (warmup ? [{name: warmup.name, sets: null, notes: warmup.notes}] : [])
-    .concat(picks.map(o => ({name: o.name, sets: cut(o.sets), notes: o.notes})));
+    .concat(picks.map((o, i) => ({name: o.name, sets: setsFor(o, i), notes: o.notes})));
   return {v: 1, tier, note: data.note.trim(), builtAt: Date.now(), blocks};
 }
 
